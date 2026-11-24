@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tecnofil · lista de deseos</title>
+  <title>tecnofil · amigo secreto</title>
 
   <!-- Tipografía grotesca (equivalente web de Atlas Grotesk Light 300 y Bold 700) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -85,7 +85,7 @@
   <!-- HEADER: BARRA BLANCA MINIMALISTA CON LOGO A LA IZQUIERDA              -->
   <!-- ===================================================================== -->
   <header class="bg-white border-b border-black/15">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-4">
       <div class="flex flex-wrap items-center justify-between gap-4">
 
         <!-- Logotipo horizontal oficial tecnofil (gap 1/4x = 10px para símbolo de 40px) -->
@@ -107,12 +107,12 @@
           </span>
         </a>
 
-        <!-- Botón negro hacia el formulario de Microsoft Forms -->
+        <!-- Botón hacia el formulario de Microsoft Forms (fondo amarillo, texto negro) -->
         <a
           href="https://forms.cloud.microsoft/r/6GLTukXTrJ"
           target="_blank"
           rel="noopener noreferrer"
-          class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded bg-black hover:bg-neutral-800 text-tecnofil-yellow text-xs sm:text-sm font-bold lowercase transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+          class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-black text-xs sm:text-sm font-bold lowercase transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
         >
           <span>registrar mis deseos ↗</span>
         </a>
@@ -122,126 +122,59 @@
   </header>
 
   <!-- ===================================================================== -->
-  <!-- HERO: BLOQUE AMARILLO #FFDD00 CON ALINEACIÓN A LA IZQUIERDA           -->
+  <!-- HERO: BLOQUE AMARILLO #FFDD00 CENTRADO                                -->
   <!-- ===================================================================== -->
   <section id="top" class="bg-tecnofil-yellow text-black border-b border-tecnofil-yellowBorder">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-      <div class="max-w-3xl space-y-4">
-
-        <!-- Contador en vivo -->
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-white text-black text-xs font-bold lowercase border border-black/15">
-          <span class="w-2 h-2 rounded-full bg-black"></span>
-          <span id="participantCount">0 participantes</span>
-        </div>
-
-        <!-- Título principal en minúsculas (Bold) -->
-        <h1 class="text-4xl sm:text-5xl font-bold tracking-[-0.03em] lowercase leading-[1.08] text-black">
-          lista de deseos
-        </h1>
-
-        <!-- Subtítulo en peso Light -->
-        <p class="text-base sm:text-lg font-light text-black leading-relaxed max-w-2xl">
-          Aquí el equipo puede consultar en tiempo real las ideas de regalo para el intercambio y conocer las preferencias de cada participante.
-        </p>
-
-      </div>
+    <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-10 sm:py-14 text-center">
+      <h1 class="text-4xl sm:text-5xl font-bold tracking-[-0.03em] lowercase leading-[1.08] text-black">
+        amigo secreto
+      </h1>
+      <p class="mt-3 text-base sm:text-lg font-light lowercase text-black leading-relaxed">
+        lista de regalos del equipo
+      </p>
     </div>
   </section>
 
   <!-- ===================================================================== -->
-  <!-- BARRA DE FILTROS, BÚSQUEDA, ORDENAMIENTO Y SINCRONIZACIÓN             -->
+  <!-- BARRA DE ESTADO CENTRADA (CONTADOR 13 DE 13 + ACTUALIZAR)             -->
   <!-- ===================================================================== -->
-  <section class="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-black/15">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="flex flex-col lg:flex-row lg:items-center gap-3">
-
-        <!-- Buscador en vivo -->
-        <div class="relative flex-1">
-          <svg class="w-4 h-4 text-black absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="buscar por nombre o regalo..."
-            autocomplete="off"
-            class="w-full pl-10 pr-10 py-2.5 text-sm font-normal bg-white border border-black/25 rounded text-black placeholder:text-black/50 placeholder:font-light focus:outline-none focus:border-black focus:ring-2 focus:ring-tecnofil-yellow transition-all"
-          />
-          <button
-            id="clearSearchBtn"
-            type="button"
-            title="limpiar búsqueda"
-            aria-label="limpiar búsqueda"
-            class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded text-black hover:bg-tecnofil-yellow text-base font-bold leading-none transition-colors"
-          >
-            ×
-          </button>
-        </div>
-
-        <!-- Controles de ordenamiento, actualización y estado de sincronización -->
-        <div class="flex flex-wrap items-center justify-between lg:justify-end gap-2.5">
-
-          <!-- Selector de ordenamiento -->
-          <div class="inline-flex items-center p-0.5 rounded bg-white border border-black/20" role="group" aria-label="ordenar lista">
-            <button
-              type="button"
-              data-sort="recent"
-              class="sort-pill px-3 py-1.5 rounded-[3px] text-xs font-bold lowercase transition-colors"
-            >
-              recientes
-            </button>
-            <button
-              type="button"
-              data-sort="az"
-              class="sort-pill px-3 py-1.5 rounded-[3px] text-xs font-bold lowercase transition-colors"
-            >
-              a - z
-            </button>
-            <button
-              type="button"
-              data-sort="za"
-              class="sort-pill px-3 py-1.5 rounded-[3px] text-xs font-bold lowercase transition-colors"
-            >
-              z - a
-            </button>
-          </div>
-
-          <!-- Botón actualizar -->
-          <button
-            id="refreshBtn"
-            type="button"
-            class="inline-flex items-center gap-2 px-3.5 py-2 rounded bg-white border border-black/25 hover:bg-tecnofil-yellow hover:border-tecnofil-yellowBorder text-xs font-bold lowercase text-black transition-colors focus:outline-none focus:ring-2 focus:ring-tecnofil-yellow disabled:opacity-60"
-          >
-            <svg id="refreshIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="23 4 23 10 17 10" />
-              <polyline points="1 20 1 14 7 14" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-            </svg>
-            <span>actualizar</span>
-          </button>
-
-          <!-- Indicador de última sincronización -->
-          <span id="syncStatus" class="text-xs font-light lowercase text-black min-w-[110px] text-right">
-            sincronizando...
-          </span>
-
-        </div>
+  <section aria-label="estado de la lista" class="bg-white border-b border-black/10">
+    <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded bg-tecnofil-yellow text-black text-xs font-bold lowercase border border-tecnofil-yellowBorder">
+        <span class="w-2 h-2 rounded-full bg-black"></span>
+        <span id="participantCount">0 de 13 personas</span>
       </div>
+
+      <button
+        id="refreshBtn"
+        type="button"
+        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded bg-white hover:bg-neutral-100 border border-black/20 text-xs font-bold lowercase text-black transition-colors focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-60"
+      >
+        <svg id="refreshIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10" />
+          <polyline points="1 20 1 14 7 14" />
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+        </svg>
+        <span>actualizar</span>
+      </button>
+
+      <span id="syncStatus" class="text-xs font-light lowercase text-black">
+        sincronizando...
+      </span>
     </div>
   </section>
 
   <!-- ===================================================================== -->
-  <!-- CONTENIDO PRINCIPAL: ESTADOS Y GRILLA DE TARJETAS                     -->
+  <!-- CONTENIDO PRINCIPAL: ESTADOS Y GRILLA FLEXBOX CENTRADA                -->
   <!-- ===================================================================== -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+  <main class="flex-1 max-w-[1120px] w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
     <!-- Estado de carga (animación negro / amarillo tecnofil) -->
     <div id="loadingState" class="hidden py-16 px-6 text-center bg-white rounded border border-black/15">
       <div class="w-12 h-12 mx-auto rounded-full bg-tecnofil-yellow flex items-center justify-center mb-4">
         <span class="w-5 h-5 border-2 border-black border-t-transparent rounded-full spin-active"></span>
       </div>
-      <p class="text-sm font-bold lowercase text-black">cargando lista de deseos...</p>
+      <p class="text-sm font-bold lowercase text-black">cargando lista...</p>
       <div class="w-44 h-1 bg-black/10 rounded overflow-hidden mx-auto mt-3">
         <div class="w-1/3 h-full bg-black loader-bar"></div>
       </div>
@@ -263,7 +196,7 @@
       <button
         id="retryBtn"
         type="button"
-        class="mt-5 inline-flex items-center justify-center px-5 py-2.5 rounded bg-black hover:bg-neutral-800 text-tecnofil-yellow text-xs font-bold lowercase transition-colors"
+        class="mt-5 inline-flex items-center justify-center px-5 py-2.5 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-black text-xs font-bold lowercase transition-colors"
       >
         reintentar
       </button>
@@ -280,76 +213,48 @@
           <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
         </svg>
       </div>
-      <h2 class="text-base font-bold lowercase text-black">aún no hay deseos registrados</h2>
+      <h2 class="text-base font-bold lowercase text-black">aún no hay respuestas registradas</h2>
       <p class="mt-1.5 text-sm font-light text-black max-w-md mx-auto">
-        Sé la primera persona del equipo en compartir tus opciones de regalo en el formulario.
+        Sé la primera persona en registrar tus deseos en el formulario.
       </p>
       <a
         href="https://forms.cloud.microsoft/r/6GLTukXTrJ"
         target="_blank"
         rel="noopener noreferrer"
-        class="mt-5 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded bg-black hover:bg-neutral-800 text-tecnofil-yellow text-xs font-bold lowercase transition-colors"
+        class="mt-5 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-black text-xs font-bold lowercase transition-colors"
       >
         <span>registrar mis deseos ↗</span>
       </a>
     </div>
 
-    <!-- Estado vacío: sin coincidencias en la búsqueda -->
-    <div id="emptySearchState" class="hidden py-16 px-6 text-center bg-white rounded border border-black/15">
-      <div class="w-12 h-12 mx-auto rounded-full bg-tecnofil-yellow text-black flex items-center justify-center mb-4">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-      </div>
-      <h2 class="text-base font-bold lowercase text-black">sin coincidencias</h2>
-      <p id="emptySearchMessage" class="mt-1.5 text-sm font-light text-black max-w-md mx-auto">
-        No encontramos participantes ni regalos que coincidan con tu búsqueda.
-      </p>
-      <button
-        id="resetSearchBtn"
-        type="button"
-        class="mt-5 inline-flex items-center justify-center px-4 py-2 rounded bg-black hover:bg-neutral-800 text-tecnofil-yellow text-xs font-bold lowercase transition-colors"
-      >
-        ver toda la lista
-      </button>
-    </div>
-
-    <!-- Grilla arquitectónica de tarjetas (1 col móvil, 2 tablet, 3 escritorio) -->
-    <div id="cardsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    <!-- Grilla Flexbox centrada (incluye centrado automático de la última fila) -->
+    <div id="cardsGrid" class="hidden flex flex-wrap justify-center gap-6"></div>
 
   </main>
 
   <!-- ===================================================================== -->
-  <!-- FOOTER: BLANCO MINIMALISTA CON LOGO A LA IZQUIERDA Y SLOGAN           -->
+  <!-- FOOTER: BLANCO MINIMALISTA Y CENTRADO CON LOGO TECNOFIL               -->
   <!-- ===================================================================== -->
   <footer class="bg-white border-t border-black/15 mt-auto">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-6 flex items-center justify-center">
 
-        <!-- Logotipo horizontal tecnofil alineado a la izquierda -->
-        <div class="inline-flex items-center gap-[7px]">
-          <svg class="w-7 h-7 flex-shrink-0" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-              <mask id="tecnofil-cut-footer">
-                <rect width="40" height="40" fill="white" />
-                <rect x="0" y="15.5" width="20" height="9" fill="black" />
-                <rect x="20" y="18.2" width="20" height="3.6" fill="black" />
-              </mask>
-            </defs>
-            <circle cx="20" cy="20" r="20" fill="#FFDD00" mask="url(#tecnofil-cut-footer)" />
-          </svg>
-          <span class="text-xl font-bold tracking-[-0.04em] lowercase leading-none text-black">
-            tecnofil
-          </span>
-        </div>
-
-        <!-- Slogan oficial en minúsculas -->
-        <p class="text-xs font-light lowercase text-black">
-          transformando cobre
-        </p>
-
+      <!-- Logotipo horizontal tecnofil centrado -->
+      <div class="inline-flex items-center gap-[7px]">
+        <svg class="w-7 h-7 flex-shrink-0" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <mask id="tecnofil-cut-footer">
+              <rect width="40" height="40" fill="white" />
+              <rect x="0" y="15.5" width="20" height="9" fill="black" />
+              <rect x="20" y="18.2" width="20" height="3.6" fill="black" />
+            </mask>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill="#FFDD00" mask="url(#tecnofil-cut-footer)" />
+        </svg>
+        <span class="text-xl font-bold tracking-[-0.04em] lowercase leading-none text-black">
+          tecnofil
+        </span>
       </div>
+
     </div>
   </footer>
 
@@ -360,11 +265,23 @@
     // Enlace CSV publicado en la web de Google Sheets
     const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAl0YbtOQdxmfxr8tDGBPt0Hn_Lk5GVN8_PP1SudyiazYrdcsRleaPCD2kg6QJAT06JzO5KR4lxe8U/pub?output=csv";
 
+    // Máximo de participantes permitidos en la lista
+    const MAX_PERSONAS = 13;
+
+    // Mapa de fotos dentro de la carpeta /fotos (coincide aunque en el Forms haya tildes o apellidos extra)
+    const FOTOS_POR_NOMBRE = {
+      "Alejandra Rojas": "fotos/Fotos_Alejandra Rojas.jpg",
+      "Diego Lazaro": "fotos/Fotos_Diego Lazaro.jpg",
+      "Emily Robles": "fotos/Fotos_Emily Robles.jpg",
+      "Fiorella Casanova": "fotos/Fotos_Fiorella Casanova.jpg",
+      "Francescoli Lucero": "fotos/Fotos_Francescoli Lucero.jpg",
+      "Mariel Cordero": "fotos/Fotos_Mariel Cordero.jpg",
+      "Meloddy Garcia": "fotos/Fotos_Meloddy Garcia.jpg"
+    };
+
     // Estado interno de la aplicación
     const state = {
       items: [],
-      searchQuery: "",
-      sortMode: "recent", // 'recent' | 'az' | 'za'
       isLoading: false,
       hasError: false
     };
@@ -372,9 +289,6 @@
     // Referencias a elementos del DOM
     const dom = {
       participantCount: document.getElementById("participantCount"),
-      searchInput: document.getElementById("searchInput"),
-      clearSearchBtn: document.getElementById("clearSearchBtn"),
-      sortButtons: document.querySelectorAll(".sort-pill"),
       refreshBtn: document.getElementById("refreshBtn"),
       refreshIcon: document.getElementById("refreshIcon"),
       syncStatus: document.getElementById("syncStatus"),
@@ -383,9 +297,6 @@
       errorMessage: document.getElementById("errorMessage"),
       retryBtn: document.getElementById("retryBtn"),
       emptyNoDataState: document.getElementById("emptyNoDataState"),
-      emptySearchState: document.getElementById("emptySearchState"),
-      emptySearchMessage: document.getElementById("emptySearchMessage"),
-      resetSearchBtn: document.getElementById("resetSearchBtn"),
       cardsGrid: document.getElementById("cardsGrid")
     };
 
@@ -426,34 +337,84 @@
     }
 
     /**
-     * Detecta enlaces http://, https:// y www. dentro de una opción de regalo.
-     * Separa el texto descriptivo de las URLs encontradas.
+     * Convierte un nombre en formato de archivo: minúsculas, sin tildes/ñ y con guiones.
+     * Ejemplo: "María Pérez" -> "maria-perez"
+     */
+    function slugifyName(name) {
+      return String(name || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    /**
+     * Resuelve la URL de la foto del participante:
+     * 1. Busca coincidencia exacta en FOTOS_POR_NOMBRE (ignorando tildes y mayúsculas).
+     * 2. Si el participante escribió apellidos adicionales o solo su nombre, busca coincidencia flexible.
+     * 3. Si aún no está en el mapa, busca automáticamente fotos/Fotos_{Nombre}.jpg.
+     */
+    function resolvePhotoUrl(name) {
+      const normalizedTarget = normalizeText(name);
+      if (!normalizedTarget) return "";
+
+      const entries = Object.entries(FOTOS_POR_NOMBRE);
+
+      // 1. Coincidencia exacta normalizada
+      for (const [key, url] of entries) {
+        if (normalizeText(key) === normalizedTarget && url) {
+          return encodeURI(url);
+        }
+      }
+
+      // 2. Coincidencia flexible (ej. "Diego Lázaro Pérez" o solo "Alejandra")
+      const targetWords = normalizedTarget.split(/\s+/).filter(Boolean);
+      for (const [key, url] of entries) {
+        if (!url) continue;
+        const keyWords = normalizeText(key).split(/\s+/).filter(Boolean);
+        const allKeyWordsPresent = keyWords.every((w) => targetWords.includes(w));
+        const allTargetWordsPresent = targetWords.length > 0 && targetWords.every((w) => keyWords.includes(w));
+        if (allKeyWordsPresent || allTargetWordsPresent) {
+          return encodeURI(url);
+        }
+      }
+
+      // 3. Respaldo automático para futuras fotos con el mismo formato Fotos_Nombre Apellido.jpg
+      const cleanName = String(name || "").trim().replace(/\s+/g, " ");
+      return cleanName ? encodeURI(`fotos/Fotos_${cleanName}.jpg`) : "";
+    }
+
+    /**
+     * Detecta enlaces http://, https:// y www. dentro de un regalo
+     * y separa el texto limpio de las URLs encontradas.
      */
     function extractLinksFromOption(rawText) {
-      const text = String(rawText || "").trim();
-      const urlRegex = /((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
-      const rawMatches = text.match(urlRegex) || [];
+      const text = String(rawText || "");
+      const urlRegex = /(?:https?:\/\/|www\.)[^\s<>()]+/gi;
+      const urls = [];
 
-      const urls = rawMatches.map((match) => {
-        const cleaned = match.replace(/[.,;:!?)\]]+$/, "");
-        return /^https?:\/\//i.test(cleaned) ? cleaned : `https://${cleaned}`;
-      });
-
-      let cleanText = text
-        .replace(urlRegex, "")
+      const cleanText = text
+        .replace(urlRegex, (match) => {
+          const cleanedMatch = match.replace(/[.,;:!?)\]]+$/, "");
+          const trailingPunctuation = match.slice(cleanedMatch.length);
+          const normalizedUrl = /^https?:\/\//i.test(cleanedMatch)
+            ? cleanedMatch
+            : `https://${cleanedMatch}`;
+          urls.push(normalizedUrl);
+          return trailingPunctuation;
+        })
         .replace(/\s{2,}/g, " ")
+        .replace(/^[\s\-–—:|,]+|[\s\-–—:|,]+$/g, "")
         .trim();
-
-      // Elimina separadores sueltos al final si el usuario escribió "Regalo - https://..."
-      cleanText = cleanText.replace(/[-–—:|(]+$/, "").trim();
 
       return { cleanText, urls };
     }
 
-    // =========================================================================
-    // PARSER CSV RFC-4180 (COMILLAS, COMAS INTERNAS, "" Y MULTILÍNEA)
-    // =========================================================================
-
+    /**
+     * Parsea texto CSV respetando comillas dobles, comas internas y saltos de línea.
+     */
     function parseCSV(csvText) {
       const rows = [];
       let currentRow = [];
@@ -462,416 +423,4 @@
 
       // Elimina BOM UTF-8 si Google Sheets lo incluye
       const input = String(csvText || "").replace(/^\uFEFF/, "");
-
-      for (let i = 0; i < input.length; i++) {
-        const char = input[i];
-        const nextChar = input[i + 1];
-
-        if (inQuotes) {
-          if (char === '"' && nextChar === '"') {
-            currentField += '"';
-            i++;
-          } else if (char === '"') {
-            inQuotes = false;
-          } else {
-            currentField += char;
-          }
-        } else {
-          if (char === '"') {
-            inQuotes = true;
-          } else if (char === ",") {
-            currentRow.push(currentField.trim());
-            currentField = "";
-          } else if (char === "\r" && nextChar === "\n") {
-            currentRow.push(currentField.trim());
-            rows.push(currentRow);
-            currentRow = [];
-            currentField = "";
-            i++;
-          } else if (char === "\n" || char === "\r") {
-            currentRow.push(currentField.trim());
-            rows.push(currentRow);
-            currentRow = [];
-            currentField = "";
-          } else {
-            currentField += char;
-          }
-        }
-      }
-
-      if (currentField.length > 0 || currentRow.length > 0) {
-        currentRow.push(currentField.trim());
-        rows.push(currentRow);
-      }
-
-      // Descarta filas completamente vacías
-      return rows.filter((row) => row.some((cell) => cell.trim().length > 0));
-    }
-
-    /**
-     * Detecta si un encabezado corresponde a una columna de marca temporal.
-     */
-    function isTimestampHeader(normalizedHeader) {
-      return (
-        normalizedHeader.includes("timestamp") ||
-        normalizedHeader.includes("marca temporal") ||
-        normalizedHeader.includes("fecha") ||
-        normalizedHeader.includes("hora de") ||
-        normalizedHeader === "id"
-      );
-    }
-
-    /**
-     * Mapea dinámicamente las columnas desde la fila de encabezados.
-     */
-    function mapRowsToItems(rows) {
-      if (!rows || rows.length < 2) return [];
-
-      const headers = rows[0].map((h) => normalizeText(h));
-
-      // Índices disponibles ignorando columnas de timestamp si existieran
-      const nonTimestampIndices = headers
-        .map((h, idx) => ({ h, idx }))
-        .filter((item) => !isTimestampHeader(item.h))
-        .map((item) => item.idx);
-
-      // 1. Columna de Nombre
-      let nameIdx = headers.findIndex(
-        (h) => h.includes("quien") || h.includes("nombre")
-      );
-      if (nameIdx === -1) {
-        nameIdx = nonTimestampIndices.length > 0 ? nonTimestampIndices[0] : 0;
-      }
-
-      // 2. Columnas de Opciones de regalo 1, 2 y 3
-      const findGiftIndex = (num, usedSet) => {
-        const patterns = [
-          `opcion de regalo ${num}`,
-          `regalo ${num}`,
-          `opcion ${num}`,
-          `${num}`
-        ];
-        for (const pattern of patterns) {
-          const found = headers.findIndex(
-            (h, idx) => !usedSet.has(idx) && !isTimestampHeader(h) && h.includes(pattern)
-          );
-          if (found !== -1) return found;
-        }
-        return -1;
-      };
-
-      const usedIndices = new Set([nameIdx]);
-
-      let opt1Idx = findGiftIndex(1, usedIndices);
-      if (opt1Idx !== -1) usedIndices.add(opt1Idx);
-
-      let opt2Idx = findGiftIndex(2, usedIndices);
-      if (opt2Idx !== -1) usedIndices.add(opt2Idx);
-
-      let opt3Idx = findGiftIndex(3, usedIndices);
-      if (opt3Idx !== -1) usedIndices.add(opt3Idx);
-
-      // Fallbacks posicionales si algún encabezado no coincidió por texto
-      const remaining = nonTimestampIndices.filter((idx) => !usedIndices.has(idx));
-      if (opt1Idx === -1 && remaining.length > 0) opt1Idx = remaining.shift();
-      if (opt2Idx === -1 && remaining.length > 0) opt2Idx = remaining.shift();
-      if (opt3Idx === -1 && remaining.length > 0) opt3Idx = remaining.shift();
-
-      const items = [];
-
-      for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        const name = (row[nameIdx] || "").trim();
-        const opt1 = opt1Idx !== -1 ? (row[opt1Idx] || "").trim() : "";
-        const opt2 = opt2Idx !== -1 ? (row[opt2Idx] || "").trim() : "";
-        const opt3 = opt3Idx !== -1 ? (row[opt3Idx] || "").trim() : "";
-
-        // Ignora filas totalmente vacías
-        if (!name && !opt1 && !opt2 && !opt3) continue;
-
-        items.push({
-          id: i,
-          name: name || "Participante sin nombre",
-          options: [opt1, opt2, opt3]
-        });
-      }
-
-      return items;
-    }
-
-    // =========================================================================
-    // SINCRONIZACIÓN CON GOOGLE SHEETS
-    // =========================================================================
-
-    function hideAllViews() {
-      dom.loadingState.classList.add("hidden");
-      dom.errorState.classList.add("hidden");
-      dom.emptyNoDataState.classList.add("hidden");
-      dom.emptySearchState.classList.add("hidden");
-      dom.cardsGrid.classList.add("hidden");
-    }
-
-    function setLoadingState(loading) {
-      state.isLoading = loading;
-      dom.refreshBtn.disabled = loading;
-
-      if (loading) {
-        dom.refreshIcon.classList.add("spin-active");
-        dom.syncStatus.textContent = "sincronizando...";
-        hideAllViews();
-        dom.loadingState.classList.remove("hidden");
-      } else {
-        dom.refreshIcon.classList.remove("spin-active");
-      }
-    }
-
-    function formatCurrentTime() {
-      const now = new Date();
-      return now.toLocaleTimeString("es-PE", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      });
-    }
-
-    async function fetchWishlists() {
-      state.hasError = false;
-      setLoadingState(true);
-
-      try {
-        const separator = GOOGLE_SHEET_CSV_URL.includes("?") ? "&" : "?";
-        const liveUrl = `${GOOGLE_SHEET_CSV_URL}${separator}_t=${Date.now()}`;
-
-        const response = await fetch(liveUrl, { cache: "no-store" });
-        if (!response.ok) {
-          throw new Error(`Error HTTP ${response.status}`);
-        }
-
-        const csvText = await response.text();
-        const rows = parseCSV(csvText);
-        state.items = mapRowsToItems(rows);
-
-        setLoadingState(false);
-        dom.syncStatus.textContent = `actualizado ${formatCurrentTime()}`;
-        render();
-      } catch (error) {
-        console.error("Error al obtener el CSV en vivo:", error);
-        state.hasError = true;
-        state.items = [];
-        setLoadingState(false);
-        dom.syncStatus.textContent = "error de conexión";
-        dom.participantCount.textContent = "0 participantes";
-        hideAllViews();
-        dom.errorState.classList.remove("hidden");
-      }
-    }
-
-    // =========================================================================
-    // FILTRADO, ORDENAMIENTO Y RENDERIZADO
-    // =========================================================================
-
-    function updateSortUI() {
-      dom.sortButtons.forEach((btn) => {
-        const isActive = btn.dataset.sort === state.sortMode;
-        if (isActive) {
-          btn.classList.add("bg-tecnofil-yellow", "text-black");
-          btn.classList.remove("text-black/60", "hover:text-black");
-        } else {
-          btn.classList.remove("bg-tecnofil-yellow");
-          btn.classList.add("text-black/60", "hover:text-black");
-        }
-      });
-    }
-
-    function getFilteredItems() {
-      const query = normalizeText(state.searchQuery);
-
-      let list = state.items.filter((item) => {
-        if (!query) return true;
-        const matchName = normalizeText(item.name).includes(query);
-        const matchOptions = item.options.some((opt) =>
-          normalizeText(opt).includes(query)
-        );
-        return matchName || matchOptions;
-      });
-
-      if (state.sortMode === "az") {
-        list = [...list].sort((a, b) =>
-          a.name.localeCompare(b.name, "es", { sensitivity: "base" })
-        );
-      } else if (state.sortMode === "za") {
-        list = [...list].sort((a, b) =>
-          b.name.localeCompare(a.name, "es", { sensitivity: "base" })
-        );
-      } else {
-        // Recientes primero (últimas filas del sheet arriba)
-        list = [...list].sort((a, b) => b.id - a.id);
-      }
-
-      return list;
-    }
-
-    function buildGiftOptionHTML(rawText, number) {
-      const { cleanText, urls } = extractLinksFromOption(rawText);
-
-      const linksMarkup = urls
-        .map(
-          (url, idx) => `
-          <a
-            href="${escapeHtml(url)}"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-black text-xs font-bold lowercase transition-colors"
-          >
-            <span>${urls.length > 1 ? `ver enlace ${idx + 1} ↗` : "ver enlace ↗"}</span>
-          </a>
-        `
-        )
-        .join("");
-
-      const textMarkup = cleanText
-        ? `<p class="text-sm font-normal text-black leading-relaxed break-words">${escapeHtml(cleanText)}</p>`
-        : `<p class="text-xs font-light lowercase text-black">enlace de referencia</p>`;
-
-      return `
-        <li class="p-3.5 rounded bg-white border border-black/15 space-y-2">
-          <div class="flex items-center justify-between gap-2">
-            <span class="inline-block px-2 py-0.5 rounded-[3px] bg-tecnofil-yellow text-black text-[11px] font-bold lowercase tracking-wide">
-              opción ${number}
-            </span>
-          </div>
-          ${textMarkup}
-          ${linksMarkup ? `<div class="flex flex-wrap gap-1.5 pt-0.5">${linksMarkup}</div>` : ""}
-        </li>
-      `;
-    }
-
-    function render() {
-      if (state.isLoading || state.hasError) return;
-
-      hideAllViews();
-
-      // Caso 1: La hoja no tiene respuestas todavía
-      if (state.items.length === 0) {
-        dom.participantCount.textContent = "0 participantes";
-        dom.emptyNoDataState.classList.remove("hidden");
-        return;
-      }
-
-      const filtered = getFilteredItems();
-      const total = filtered.length;
-
-      dom.participantCount.textContent = `${total} ${total === 1 ? "participante" : "participantes"}`;
-
-      // Caso 2: Hay datos, pero la búsqueda no arrojó coincidencias
-      if (total === 0) {
-        dom.emptySearchMessage.textContent = `No encontramos participantes ni regalos para "${state.searchQuery.trim()}".`;
-        dom.emptySearchState.classList.remove("hidden");
-        return;
-      }
-
-      // Caso 3: Renderizar tarjetas
-      dom.cardsGrid.classList.remove("hidden");
-      dom.cardsGrid.innerHTML = filtered
-        .map((item, idx) => {
-          const initials = getInitials(item.name);
-
-          const filledOptions = item.options
-            .map((text, i) => ({ text: String(text || "").trim(), number: i + 1 }))
-            .filter((opt) => opt.text.length > 0);
-
-          const optionsHtml =
-            filledOptions.length > 0
-              ? filledOptions.map((opt) => buildGiftOptionHTML(opt.text, opt.number)).join("")
-              : `<li class="p-3.5 rounded bg-white border border-black/10 text-xs font-light lowercase text-black/60">sin especificar</li>`;
-
-          const delay = Math.min(idx * 35, 280);
-
-          return `
-            <article
-              class="card-animate bg-white rounded border border-black/20 hover:border-black transition-all duration-150 flex flex-col overflow-hidden"
-              style="animation-delay: ${delay}ms;"
-            >
-              <!-- Franja superior amarilla tecnofil -->
-              <div class="h-1.5 w-full bg-tecnofil-yellow"></div>
-
-              <div class="p-5 flex-1 flex flex-col">
-                <!-- Cabecera: monograma amarillo + nombre en negrita -->
-                <div class="flex items-center gap-3 pb-4 mb-4 border-b border-black/15">
-                  <div class="w-10 h-10 rounded-full bg-tecnofil-yellow text-black font-bold text-xs flex items-center justify-center flex-shrink-0 tracking-wide">
-                    ${escapeHtml(initials)}
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <h2 class="text-base font-bold text-black truncate" title="${escapeHtml(item.name)}">
-                      ${escapeHtml(item.name)}
-                    </h2>
-                    <p class="text-xs font-light lowercase text-black">
-                      ${filledOptions.length} ${filledOptions.length === 1 ? "opción" : "opciones"}
-                    </p>
-                  </div>
-                </div>
-
-                <!-- Lista numerada de opciones de regalo -->
-                <ul class="space-y-2.5 flex-1">
-                  ${optionsHtml}
-                </ul>
-              </div>
-            </article>
-          `;
-        })
-        .join("");
-    }
-
-    // =========================================================================
-    // EVENTOS DE INTERACCIÓN
-    // =========================================================================
-
-    dom.searchInput.addEventListener("input", (e) => {
-      state.searchQuery = e.target.value;
-      dom.clearSearchBtn.classList.toggle("hidden", state.searchQuery.length === 0);
-      render();
-    });
-
-    dom.clearSearchBtn.addEventListener("click", () => {
-      state.searchQuery = "";
-      dom.searchInput.value = "";
-      dom.clearSearchBtn.classList.add("hidden");
-      dom.searchInput.focus();
-      render();
-    });
-
-    dom.resetSearchBtn.addEventListener("click", () => {
-      state.searchQuery = "";
-      dom.searchInput.value = "";
-      dom.clearSearchBtn.classList.add("hidden");
-      render();
-    });
-
-    dom.sortButtons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        state.sortMode = btn.dataset.sort;
-        updateSortUI();
-        render();
-      });
-    });
-
-    dom.refreshBtn.addEventListener("click", () => {
-      if (!state.isLoading) {
-        fetchWishlists();
-      }
-    });
-
-    dom.retryBtn.addEventListener("click", () => {
-      if (!state.isLoading) {
-        fetchWishlists();
-      }
-    });
-
-    // Inicialización al cargar la página
-    window.addEventListener("DOMContentLoaded", () => {
-      updateSortUI();
-      fetchWishlists();
-    });
-  </script>
-</body>
-</html>
+// ... existing code ... -->
