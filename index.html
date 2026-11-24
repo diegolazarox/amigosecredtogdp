@@ -423,4 +423,294 @@
 
       // Elimina BOM UTF-8 si Google Sheets lo incluye
       const input = String(csvText || "").replace(/^\uFEFF/, "");
-// ... existing code ... -->
+
+      for (let i = 0; i < input.length; i++) {
+        const char = input[i];
+        const nextChar = input[i + 1];
+
+        if (inQuotes) {
+          if (char === '"' && nextChar === '"') {
+            currentField += '"';
+            i++; // Salta la comilla escapada
+          } else if (char === '"') {
+            inQuotes = false;
+          } else {
+            currentField += char;
+          }
+        } else {
+          if (char === '"') {
+            inQuotes = true;
+          } else if (char === ",") {
+            currentRow.push(currentField);
+            currentField = "";
+          } else if (char === "\r" && nextChar === "\n") {
+            currentRow.push(currentField);
+            rows.push(currentRow);
+            currentRow = [];
+            currentField = "";
+            i++; // Salta el \n de \r\n
+          } else if (char === "\n" || char === "\r") {
+            currentRow.push(currentField);
+            rows.push(currentRow);
+            currentRow = [];
+            currentField = "";
+          } else {
+            currentField += char;
+          }
+        }
+      }
+
+      // Agrega el último campo/fila si existe contenido
+      if (currentField.length > 0 || currentRow.length > 0) {
+        currentRow.push(currentField);
+        rows.push(currentRow);
+      }
+
+      return rows;
+    }
+
+    /**
+     * Encuentra el índice de columna en los encabezados buscando patrones flexibles.
+     */
+    function findColumnIndex(normalizedHeaders, patterns) {
+      for (const pattern of patterns) {
+        const idx = normalizedHeaders.findIndex((h) => h.includes(pattern));
+        if (idx !== -1) return idx;
+      }
+      return -1;
+    }
+
+    /**
+     * Transforma las filas del CSV en una lista deduplicada, ordenada A-Z y limitada a MAX_PERSONAS.
+     */
+    function processCSVData(csvText) {
+      const rows = parseCSV(csvText).filter((row) =>
+        row.some((cell) => String(cell || "").trim() !== "")
+      );
+
+      if (rows.length <= 1) return [];
+
+      const headers = rows[0].map((h) => normalizeText(h));
+
+      let nameIdx = findColumnIndex(headers, ["quien eres", "nombre", "participante"]);
+      let gift1Idx = findColumnIndex(headers, ["regalo 1", "opcion 1", "deseo 1"]);
+      let gift2Idx = findColumnIndex(headers, ["regalo 2", "opcion 2", "deseo 2"]);
+      let gift3Idx = findColumnIndex(headers, ["regalo 3", "opcion 3", "deseo 3"]);
+
+      // Respaldo posicional si los encabezados difieren
+      if (nameIdx === -1) nameIdx = headers.length >= 5 ? 1 : 0;
+      if (gift1Idx === -1) gift1Idx = nameIdx + 1;
+      if (gift2Idx === -1) gift2Idx = nameIdx + 2;
+      if (gift3Idx === -1) gift3Idx = nameIdx + 3;
+
+      // Deduplicación por nombre normalizado (conserva la respuesta más reciente)
+      const uniqueMap = new Map();
+
+      for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const rawName = String(row[nameIdx] || "").trim();
+        if (!rawName) continue;
+
+        const key = normalizeText(rawName);
+        const gifts = [
+          String(row[gift1Idx] || "").trim(),
+          String(row[gift2Idx] || "").trim(),
+          String(row[gift3Idx] || "").trim()
+        ];
+
+        uniqueMap.set(key, {
+          name: rawName,
+          gifts
+        });
+      }
+
+      // Limita al máximo configurado y ordena automáticamente de la A a la Z
+      return Array.from(uniqueMap.values())
+        .slice(0, MAX_PERSONAS)
+        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+    }
+
+    // =========================================================================
+    // RENDERIZADO DE LA INTERFAZ
+    // =========================================================================
+
+    /**
+     * Genera el HTML del avatar circular con foto y respaldo automático de iniciales.
+     */
+    function buildAvatarHtml(name) {
+      const photoUrl = resolvePhotoUrl(name);
+      const initials = escapeHtml(getInitials(name));
+      const safeAlt = escapeHtml(name);
+
+      if (!photoUrl) {
+        return `
+          <div class="w-14 h-14 rounded-full bg-tecnofil-yellow border-2 border-tecnofil-yellowBorder flex items-center justify-center flex-shrink-0">
+            <span class="text-sm font-bold text-black tracking-tight">${initials}</span>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="relative w-14 h-14 rounded-full bg-tecnofil-yellow border-2 border-tecnofil-yellowBorder overflow-hidden flex items-center justify-center flex-shrink-0">
+          <span class="text-sm font-bold text-black tracking-tight select-none">${initials}</span>
+          <img
+            src="${photoUrl}"
+            alt="${safeAlt}"
+            loading="lazy"
+            class="absolute inset-0 w-full h-full object-cover object-top"
+            onerror="this.style.display='none';"
+          />
+        </div>
+      `;
+    }
+
+    /**
+     * Genera el HTML de cada fila de regalo con detección automática de enlaces.
+     */
+    function buildGiftRowHtml(rawGift, number) {
+      const { cleanText, urls } = extractLinksFromOption(rawGift);
+      const hasContent = cleanText.length > 0 || urls.length > 0;
+
+      const textHtml = hasContent
+        ? (cleanText
+            ? `<p class="text-sm font-light text-black leading-snug break-words">${escapeHtml(cleanText)}</p>`
+            : "")
+        : `<p class="text-sm font-light text-black/40 italic lowercase">sin especificar</p>`;
+
+      const linksHtml = urls.length > 0
+        ? `<div class="mt-1.5 flex flex-wrap gap-1.5">
+            ${urls.map((url, idx) => `
+              <a
+                href="${escapeHtml(url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-[11px] font-bold lowercase text-black transition-colors"
+              >
+                <span>${urls.length > 1 ? `ver enlace ${idx + 1} ↗` : "ver enlace ↗"}</span>
+              </a>
+            `).join("")}
+          </div>`
+        : "";
+
+      return `
+        <li class="flex items-start gap-3 py-2.5 border-t border-black/10 first:border-t-0 first:pt-0">
+          <span class="w-6 h-6 rounded-full bg-tecnofil-yellow border border-tecnofil-yellowBorder text-black text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+            ${number}
+          </span>
+          <div class="min-w-0 flex-1">
+            ${textHtml}
+            ${linksHtml}
+          </div>
+        </li>
+      `;
+    }
+
+    /**
+     * Actualiza la visibilidad de los estados y dibuja las tarjetas.
+     */
+    function render() {
+      const count = state.items.length;
+      dom.participantCount.textContent = `${count} de ${MAX_PERSONAS} personas`;
+
+      // Oculta todos los contenedores antes de mostrar el estado correspondiente
+      dom.loadingState.classList.add("hidden");
+      dom.errorState.classList.add("hidden");
+      dom.emptyNoDataState.classList.add("hidden");
+      dom.cardsGrid.classList.add("hidden");
+
+      if (state.isLoading && count === 0) {
+        dom.loadingState.classList.remove("hidden");
+        return;
+      }
+
+      if (state.hasError && count === 0) {
+        dom.errorState.classList.remove("hidden");
+        return;
+      }
+
+      if (count === 0) {
+        dom.emptyNoDataState.classList.remove("hidden");
+        return;
+      }
+
+      dom.cardsGrid.innerHTML = state.items
+        .map((person, index) => `
+          <article
+            class="card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white rounded border border-black/15 hover:border-black transition-colors p-5 flex flex-col shadow-sm"
+            style="animation-delay: ${Math.min(index * 40, 400)}ms;"
+          >
+            <div class="flex items-center gap-3.5 pb-4 border-b border-black/10">
+              ${buildAvatarHtml(person.name)}
+              <div class="min-w-0">
+                <h2 class="text-base font-bold text-black leading-tight break-words">
+                  ${escapeHtml(person.name)}
+                </h2>
+              </div>
+            </div>
+
+            <ul class="mt-4 flex-1 flex flex-col">
+              ${buildGiftRowHtml(person.gifts[0], 1)}
+              ${buildGiftRowHtml(person.gifts[1], 2)}
+              ${buildGiftRowHtml(person.gifts[2], 3)}
+            </ul>
+          </article>
+        `)
+        .join("");
+
+      dom.cardsGrid.classList.remove("hidden");
+    }
+
+    // =========================================================================
+    // SINCRONIZACIÓN CON GOOGLE SHEETS
+    // =========================================================================
+
+    function formatTimeNow() {
+      const now = new Date();
+      return now.toLocaleTimeString("es-PE", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    async function loadWishlist() {
+      state.isLoading = true;
+      state.hasError = false;
+      dom.refreshBtn.disabled = true;
+      dom.refreshIcon.classList.add("spin-active");
+      dom.syncStatus.textContent = "sincronizando...";
+      render();
+
+      try {
+        const cacheBusterUrl = `${GOOGLE_SHEET_CSV_URL}&t=${Date.now()}`;
+        const response = await fetch(cacheBusterUrl, { cache: "no-store" });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const csvText = await response.text();
+        state.items = processCSVData(csvText);
+        dom.syncStatus.textContent = `actualizado ${formatTimeNow()}`;
+      } catch (error) {
+        console.error("Error al cargar el CSV:", error);
+        state.hasError = true;
+        dom.errorMessage.textContent =
+          "No se pudieron obtener las respuestas del documento. Verifica tu conexión e intenta nuevamente.";
+        dom.syncStatus.textContent = "error de conexión";
+      } finally {
+        state.isLoading = false;
+        dom.refreshBtn.disabled = false;
+        dom.refreshIcon.classList.remove("spin-active");
+        render();
+      }
+    }
+
+    // Eventos de usuario
+    dom.refreshBtn.addEventListener("click", loadWishlist);
+    dom.retryBtn.addEventListener("click", loadWishlist);
+
+    // Carga inicial al abrir la página
+    loadWishlist();
+  </script>
+</body>
+</html>
