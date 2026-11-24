@@ -306,7 +306,7 @@
   </main>
 
   <!-- ===================================================================== -->
-  <!-- MODAL DE REGISTRO / EDICIÓN DE DESEOS                                 -->
+  <!-- MODAL DE REGISTRO / EDICIÓN DE REGALOS                                -->
   <!-- ===================================================================== -->
   <div id="wishModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
     <div class="relative w-full max-w-lg bg-white rounded-2xl border-2 border-black shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
@@ -539,49 +539,53 @@
   <!-- ===================================================================== -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Configuración oficial de tu proyecto Firebase (amigosecreto-tecnofil)
+    const FIREBASE_CONFIG = {
+      apiKey: "AIzaSyBalPTX_tv7fjFZuURv2EdfqhZnc2a7els",
+      authDomain: "amigosecreto-tecnofil.firebaseapp.com",
+      databaseURL: "https://amigosecreto-tecnofil-default-rtdb.firebaseio.com",
+      projectId: "amigosecreto-tecnofil",
+      storageBucket: "amigosecreto-tecnofil.firebasestorage.app",
+      messagingSenderId: "180771951370",
+      appId: "1:180771951370:web:fef51d88e0486f2c0be0f3"
+    };
 
     // Máximo de participantes
     const MAX_PERSONAS = 13;
-
-    // Clave de respaldo local cuando no existe configuración de Firebase
-    const LOCAL_STORAGE_KEY = "tecnofil_amigo_secreto_deseos_v1";
-
-    // Respaldo de lectura del Google Sheet (opcional si existen datos previos)
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAl0YbtOQdxmfxr8tDGBPt0Hn_Lk5GVN8_PP1SudyiazYrdcsRleaPCD2kg6QJAT06JzO5KR4lxe8U/pub?output=csv";
 
     // Respaldos públicos hacia tu repositorio de GitHub para que las fotos .png se vean en cualquier lugar
     const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/diegolazarox/amigosecredtogdp/main/";
     const GITHUB_PAGES_BASE = "https://diegolazarox.github.io/amigosecredtogdp/";
 
-    // Lista oficial de los 13 integrantes con sus fotos .png exactas del repositorio
+    // Directorio oficial de los 13 integrantes y sus archivos .png exactos en la carpeta fotos/
     const TEAM_DIRECTORY = [
-      { name: "Alejandra Rojas", file: "fotos/Fotos_Alejandra Rojas.png" },
-      { name: "Diego Lazaro", file: "fotos/Fotos_Diego Lazaro.png" },
-      { name: "Emily Robles", file: "fotos/Fotos_Emily Robles.png" },
-      { name: "Fiorella Casanova", file: "fotos/Fotos_Fiorella Casanova.png" },
-      { name: "Francescoli Lucero", file: "fotos/Fotos_Francescoli Lucero.png" },
-      { name: "Mariel Cordero", file: "fotos/Fotos_Mariel Cordero.png" },
-      { name: "Meloddy Garcia", file: "fotos/Fotos_Meloddy Garcia.png" },
-      { name: "Néstor Flores", file: "fotos/Fotos_Néstor Flores.png" },
-      { name: "Renato Galvez", file: "fotos/Fotos_Renato Galvez.png" },
-      { name: "Rodrigo Molero", file: "fotos/Fotos_Rodrigo Molero.png" },
-      { name: "Rosa Rosas", file: "fotos/Fotos_Rosa Rosas.png" },
-      { name: "Sofia Paredes", file: "fotos/Fotos_Sofia Paredes.png" },
-      { name: "Zaandra Silva", file: "fotos/Fotos_Zaandra Silva.png" }
+      { name: "Alejandra Rojas", file: "Fotos_Alejandra Rojas.png" },
+      { name: "Diego Lazaro", file: "Fotos_Diego Lazaro.png" },
+      { name: "Emily Robles", file: "Fotos_Emily Robles.png" },
+      { name: "Fiorella Casanova", file: "Fotos_Fiorella Casanova.png" },
+      { name: "Francescoli Lucero", file: "Fotos_Francescoli Lucero.png" },
+      { name: "Mariel Cordero", file: "Fotos_Mariel Cordero.png" },
+      { name: "Meloddy Garcia", file: "Fotos_Meloddy Garcia.png" },
+      { name: "Néstor Flores", file: "Fotos_Néstor Flores.png" },
+      { name: "Renato Galvez", file: "Fotos_Renato Galvez.png" },
+      { name: "Rodrigo Molero", file: "Fotos_Rodrigo Molero.png" },
+      { name: "Rosa Rosas", file: "Fotos_Rosa Rosas.png" },
+      { name: "Sofia Paredes", file: "Fotos_Sofia Paredes.png" },
+      { name: "Zaandra Silva", file: "Fotos_Zaandra Silva.png" }
     ];
 
-    // Estado de la aplicación
+    // Estado central de la aplicación
     const state = {
       items: [],
-      useCloud: false,
       db: null,
       collectionPath: null,
-      toastTimer: null
+      useCloud: false,
+      currentViewingName: null
     };
 
-    // Referencias al DOM
+    // Referencias a elementos del DOM
     const dom = {
       participantCount: document.getElementById("participantCount"),
       syncStatus: document.getElementById("syncStatus"),
@@ -591,6 +595,8 @@
       loadingState: document.getElementById("loadingState"),
       emptyNoDataState: document.getElementById("emptyNoDataState"),
       cardsGrid: document.getElementById("cardsGrid"),
+
+      // Modal de registro/edición
       wishModal: document.getElementById("wishModal"),
       modalTitle: document.getElementById("modalTitle"),
       modalPreviewAvatar: document.getElementById("modalPreviewAvatar"),
@@ -604,39 +610,44 @@
       gift3Url: document.getElementById("gift3Url"),
       formErrorMsg: document.getElementById("formErrorMsg"),
       submitWishBtn: document.getElementById("submitWishBtn"),
+
+      // Modal de lectura rápida
       viewGiftsModal: document.getElementById("viewGiftsModal"),
       viewModalAvatar: document.getElementById("viewModalAvatar"),
       viewModalName: document.getElementById("viewModalName"),
       viewModalList: document.getElementById("viewModalList"),
       viewModalEditBtn: document.getElementById("viewModalEditBtn"),
+
+      // Botones de apertura y cierre
+      openModalHeaderBtn: document.getElementById("openModalHeaderBtn"),
+      openModalHeroBtn: document.getElementById("openModalHeroBtn"),
+      openModalEmptyBtn: document.getElementById("openModalEmptyBtn"),
+      closeModalBtn: document.getElementById("closeModalBtn"),
+      cancelModalBtn: document.getElementById("cancelModalBtn"),
+      closeViewModalBtn: document.getElementById("closeViewModalBtn"),
+      closeViewModalFooterBtn: document.getElementById("closeViewModalFooterBtn"),
+
+      // Notificación toast
       toastBox: document.getElementById("toastBox"),
       toastText: document.getElementById("toastText")
     };
 
     // =========================================================================
-    // UTILIDADES GENERALES
+    // UTILIDADES DE TEXTO, FOTOS Y SEGURIDAD
     // =========================================================================
 
-    function escapeHtml(str) {
-      return String(str ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#39;");
-    }
-
-    function normalizeText(str) {
-      return String(str ?? "")
-        .toLowerCase()
+    function normalizeKey(str) {
+      return String(str || "")
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
         .replace(/\s+/g, " ")
         .trim();
     }
 
     function getDocIdFromName(name) {
-      return normalizeText(name).replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "integrante";
+      return normalizeKey(name).replace(/\s+/g, "_");
     }
 
     function getInitials(name) {
@@ -646,467 +657,474 @@
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
 
+    function findDirectoryEntry(name) {
+      const key = normalizeKey(name);
+      return TEAM_DIRECTORY.find((p) => normalizeKey(p.name) === key) || null;
+    }
+
+    function getPhotoCandidates(name) {
+      const entry = findDirectoryEntry(name);
+      const file = entry ? entry.file : `Fotos_${String(name || "").trim()}.png`;
+      const encoded = encodeURIComponent(file);
+      return [
+        `fotos/${encoded}`,
+        `${GITHUB_RAW_BASE}fotos/${encoded}`,
+        `${GITHUB_PAGES_BASE}fotos/${encoded}`
+      ];
+    }
+
+    /**
+     * Inserta la foto con respaldo en cadena dentro de un contenedor circular pequeño
+     * y muestra iniciales si ninguna URL carga.
+     */
+    function mountAvatarInto(container, name) {
+      container.innerHTML = "";
+      const fallback = document.createElement("span");
+      fallback.className = "text-xs font-bold text-black select-none";
+      fallback.textContent = getInitials(name);
+      container.appendChild(fallback);
+
+      const candidates = getPhotoCandidates(name);
+      const img = document.createElement("img");
+      img.alt = name;
+      img.className = "absolute inset-0 w-full h-full object-cover object-top";
+      let idx = 0;
+
+      img.onerror = () => {
+        idx += 1;
+        if (idx < candidates.length) {
+          img.src = candidates[idx];
+        } else {
+          img.remove();
+        }
+      };
+
+      img.src = candidates[0];
+      container.appendChild(img);
+    }
+
+    function sanitizeUrl(rawUrl) {
+      const cleaned = String(rawUrl || "").trim();
+      if (!cleaned) return "";
+      if (/^https?:\/\//i.test(cleaned)) return cleaned;
+      if (/^www\./i.test(cleaned)) return `https://${cleaned}`;
+      return "";
+    }
+
+    let toastTimer = null;
     function showToast(message) {
       dom.toastText.textContent = message;
       dom.toastBox.classList.remove("hidden");
       dom.toastBox.classList.add("inline-flex");
-      clearTimeout(state.toastTimer);
-      state.toastTimer = setTimeout(() => {
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
         dom.toastBox.classList.add("hidden");
         dom.toastBox.classList.remove("inline-flex");
       }, 3000);
     }
 
     function launchConfetti() {
-      const colors = ["#FFDD00", "#000000", "#EFCD00", "#C87533", "#FFFFFF"];
+      const colors = ["#FFDD00", "#000000", "#FFFFFF", "#C87533", "#EFCD00"];
       for (let i = 0; i < 36; i++) {
         const piece = document.createElement("div");
         piece.className = "confetti-piece";
+        const size = Math.floor(Math.random() * 7) + 6;
+        piece.style.width = `${size}px`;
+        piece.style.height = `${size * 0.6}px`;
         piece.style.left = `${Math.random() * 100}vw`;
-        piece.style.width = `${6 + Math.random() * 7}px`;
-        piece.style.height = `${8 + Math.random() * 8}px`;
         piece.style.backgroundColor = colors[i % colors.length];
         piece.style.borderRadius = Math.random() > 0.5 ? "9999px" : "2px";
-        piece.style.animationDelay = `${Math.random() * 0.45}s`;
-        piece.style.border = colors[i % colors.length] === "#FFFFFF" ? "1px solid #000" : "none";
+        piece.style.animationDelay = `${(Math.random() * 0.4).toFixed(2)}s`;
+        piece.style.animationDuration = `${(1.8 + Math.random() * 0.9).toFixed(2)}s`;
         document.body.appendChild(piece);
-        setTimeout(() => piece.remove(), 2700);
+        setTimeout(() => piece.remove(), 2900);
       }
     }
 
     // =========================================================================
-    // RESOLUCIÓN DE FOTOS .PNG CON RESPALDOS AUTOMÁTICOS
+    // NORMALIZACIÓN Y BÚSQUEDA DE REGISTROS
     // =========================================================================
 
-    function getPhotoCandidates(name) {
-      const norm = normalizeText(name);
-      const match = TEAM_DIRECTORY.find((m) => normalizeText(m.name) === norm)
-        || TEAM_DIRECTORY.find((m) => {
-          const mNorm = normalizeText(m.name);
-          return norm && (mNorm.includes(norm) || norm.includes(mNorm));
-        });
-
-      const relPath = match ? match.file : `fotos/Fotos_${String(name || "").trim()}.png`;
-      const encodedRel = encodeURI(relPath);
-
-      return [
-        encodedRel,
-        `${GITHUB_PAGES_BASE}${encodedRel}`,
-        `${GITHUB_RAW_BASE}${encodedRel}`
-      ];
-    }
-
-    // Manejador global de fallback para imágenes de avatares
-    window.handleAvatarError = function (imgEl) {
-      const fallbacks = (imgEl.dataset.fallbacks || "").split("|").filter(Boolean);
-      const nextIndex = Number(imgEl.dataset.fallbackIdx || 0);
-      if (nextIndex < fallbacks.length) {
-        imgEl.dataset.fallbackIdx = String(nextIndex + 1);
-        imgEl.src = fallbacks[nextIndex];
-      } else {
-        imgEl.style.display = "none";
-      }
-    };
-
-    function buildAvatarImgTag(name, extraClasses = "") {
-      const candidates = getPhotoCandidates(name);
-      const [first, ...rest] = candidates;
-      return `
-        <img
-          src="${escapeHtml(first)}"
-          data-fallbacks="${escapeHtml(rest.join("|"))}"
-          data-fallback-idx="0"
-          alt="${escapeHtml(name)}"
-          loading="lazy"
-          onerror="window.handleAvatarError(this)"
-          class="absolute inset-0 w-full h-full object-cover object-top ${extraClasses}"
-        />
-      `;
-    }
-
-    // =========================================================================
-    // NORMALIZACIÓN DE REGALOS Y ENLACES
-    // =========================================================================
-
-    function normalizeGiftEntry(gift) {
-      if (!gift) return { text: "", rawUrl: "", href: "" };
-
-      let text = "";
-      let rawUrl = "";
-
-      if (typeof gift === "string") {
-        text = gift.trim();
-      } else {
-        text = String(gift.text || "").trim();
-        rawUrl = String(gift.url || "").trim();
-      }
-
-      // Si no hay URL separada, intenta detectar una dentro del texto
-      if (!rawUrl && text) {
-        const urlMatch = text.match(/(https?:\/\/[^\s]+|www\.[^\s]+)/i);
-        if (urlMatch) {
-          rawUrl = urlMatch[0].replace(/[),.;]+$/, "");
-          text = text.replace(urlMatch[0], "").trim();
+    function getSortedUniqueItems() {
+      const map = new Map();
+      state.items.forEach((item) => {
+        if (!item || !item.name) return;
+        const key = normalizeKey(item.name);
+        const existing = map.get(key);
+        if (!existing || (item.updatedAt || 0) >= (existing.updatedAt || 0)) {
+          map.set(key, item);
         }
-      }
+      });
 
-      let href = "";
-      if (rawUrl) {
-        href = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
-      }
-
-      return { text, rawUrl, href };
+      return Array.from(map.values())
+        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+        .slice(0, MAX_PERSONAS);
     }
 
-    function buildGiftRowHtml(gift, indexNumber) {
-      const { text, href } = normalizeGiftEntry(gift);
-      const isEmpty = !text && !href;
-
-      if (isEmpty) {
-        return `
-          <li class="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-dashed border-black/15">
-            <span class="w-6 h-6 rounded-full bg-neutral-200 text-black/45 text-xs font-bold flex items-center justify-center flex-shrink-0">
-              ${indexNumber}
-            </span>
-            <span class="text-xs font-light lowercase text-black/40">sin especificar</span>
-          </li>
-        `;
-      }
-
-      return `
-        <li class="flex items-start gap-3 p-3 rounded-xl bg-[#FAFAFA] border border-black/10 hover:border-black/30 transition-colors">
-          <span class="mt-0.5 w-6 h-6 rounded-full bg-tecnofil-yellow border border-black text-black text-xs font-bold flex items-center justify-center flex-shrink-0">
-            ${indexNumber}
-          </span>
-          <div class="min-w-0 flex-1">
-            <p class="text-sm font-medium text-black leading-snug break-words">
-              ${escapeHtml(text || "ver enlace de referencia")}
-            </p>
-            ${href ? `
-              <a
-                href="${escapeHtml(href)}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-tecnofil-yellow/60 hover:bg-tecnofil-yellow border border-black/20 text-[11px] font-bold lowercase text-black transition-colors"
-              >
-                <span>ver enlace</span>
-                <span aria-hidden="true">↗</span>
-              </a>
-            ` : ""}
-          </div>
-        </li>
-      `;
+    function findRegisteredByName(name) {
+      const key = normalizeKey(name);
+      return getSortedUniqueItems().find((item) => normalizeKey(item.name) === key) || null;
     }
 
     // =========================================================================
-    // RENDERIZADO DE PROGRESO, BARRA DE CARAS Y TARJETAS
+    // RENDERIZADO DE LA INTERFAZ
     // =========================================================================
+
+    function populatePersonSelect() {
+      dom.personSelect.innerHTML = "";
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "Selecciona tu nombre...";
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      dom.personSelect.appendChild(placeholder);
+
+      TEAM_DIRECTORY.forEach((person) => {
+        const opt = document.createElement("option");
+        opt.value = person.name;
+        opt.textContent = person.name;
+        dom.personSelect.appendChild(opt);
+      });
+    }
 
     function renderTeamAvatarStrip() {
-      const registeredSet = new Set(state.items.map((item) => normalizeText(item.name)));
+      dom.teamAvatarStrip.innerHTML = "";
+      const registeredMap = new Map(
+        getSortedUniqueItems().map((item) => [normalizeKey(item.name), item])
+      );
 
-      dom.teamAvatarStrip.innerHTML = TEAM_DIRECTORY
-        .map((member) => {
-          const isRegistered = registeredSet.has(normalizeText(member.name));
-          const firstName = member.name.split(" ")[0];
-          const ringClasses = isRegistered
-            ? "border-black ring-2 ring-tecnofil-yellow"
-            : "border-black/20 opacity-65 hover:opacity-100";
+      TEAM_DIRECTORY.forEach((person) => {
+        const registered = registeredMap.get(normalizeKey(person.name));
+        const firstName = person.name.split(" ")[0];
 
-          return `
-            <button
-              type="button"
-              data-member-name="${escapeHtml(member.name)}"
-              title="${escapeHtml(member.name)} · ${isRegistered ? "clic para ver sus regalos" : "aún no registra (clic para agregar)"}"
-              class="team-avatar-btn group flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none"
-            >
-              <div class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 ${ringClasses} bg-tecnofil-yellow/30 overflow-hidden flex items-center justify-center transition-all group-hover:-translate-y-0.5">
-                <span class="text-[11px] font-bold text-black select-none">${escapeHtml(getInitials(member.name))}</span>
-                ${buildAvatarImgTag(member.name, isRegistered ? "" : "grayscale group-hover:grayscale-0 transition-all")}
-                ${isRegistered ? `
-                  <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-black text-tecnofil-yellow flex items-center justify-center border border-white">
-                    <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                  </span>
-                ` : ""}
-              </div>
-              <span class="text-[10px] font-semibold text-black/80 max-w-[54px] truncate">
-                ${escapeHtml(firstName)}
-              </span>
-            </button>
-          `;
-        })
-        .join("");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.title = registered
+          ? `Ver regalos de ${person.name}`
+          : `Registrar regalos de ${person.name}`;
+        btn.className =
+          "group flex flex-col items-center gap-1.5 flex-shrink-0 w-16 focus:outline-none";
 
-      // Clic en una cara: si ya registró muestra sus regalos; si no, abre el formulario
-      dom.teamAvatarStrip.querySelectorAll(".team-avatar-btn").forEach((btn) => {
+        const ring = document.createElement("div");
+        ring.className = registered
+          ? "relative w-12 h-12 rounded-full bg-tecnofil-yellow border-2 border-black overflow-hidden flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-110"
+          : "relative w-12 h-12 rounded-full bg-neutral-100 border-2 border-dashed border-black/25 overflow-hidden flex items-center justify-center opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 group-hover:border-black transition-all duration-200";
+
+        mountAvatarInto(ring, person.name);
+
+        // Insignia de check verde/amarillo si ya registró
+        const avatarWrapper = document.createElement("div");
+        avatarWrapper.className = "relative";
+        avatarWrapper.appendChild(ring);
+
+        if (registered) {
+          const badge = document.createElement("span");
+          badge.className =
+            "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-black text-tecnofil-yellow border border-white flex items-center justify-center";
+          badge.innerHTML = `<svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+          avatarWrapper.appendChild(badge);
+        }
+
+        const label = document.createElement("span");
+        label.className = registered
+          ? "text-[11px] font-bold text-black truncate w-full text-center"
+          : "text-[11px] font-light text-black/60 group-hover:text-black truncate w-full text-center";
+        label.textContent = firstName;
+
+        btn.appendChild(avatarWrapper);
+        btn.appendChild(label);
+
         btn.addEventListener("click", () => {
-          const memberName = btn.dataset.memberName;
-          const existing = state.items.find(
-            (item) => normalizeText(item.name) === normalizeText(memberName)
-          );
-          if (existing) {
-            openViewModal(existing);
+          if (registered) {
+            openViewGiftsModal(registered);
           } else {
-            openModal(memberName);
+            openWishModal(person.name);
           }
         });
+
+        dom.teamAvatarStrip.appendChild(btn);
+      });
+    }
+
+    function buildGiftListElement(gifts) {
+      const ul = document.createElement("ul");
+      ul.className = "flex flex-col gap-2.5";
+
+      const validGifts = (Array.isArray(gifts) ? gifts : []).filter(
+        (g) => g && String(g.text || "").trim() !== ""
+      );
+
+      validGifts.forEach((gift, index) => {
+        const li = document.createElement("li");
+        li.className =
+          "p-3 rounded-xl bg-[#FAFAFA] border border-black/10 flex items-start gap-2.5";
+
+        const num = document.createElement("span");
+        num.className =
+          "w-6 h-6 rounded-full bg-tecnofil-yellow border border-black text-black text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5";
+        num.textContent = String(index + 1);
+
+        const content = document.createElement("div");
+        content.className = "min-w-0 flex-1";
+
+        const text = document.createElement("p");
+        text.className = "text-sm font-medium text-black leading-snug break-words";
+        text.textContent = gift.text.trim();
+        content.appendChild(text);
+
+        const safeUrl = sanitizeUrl(gift.url);
+        if (safeUrl) {
+          const link = document.createElement("a");
+          link.href = safeUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.className =
+            "mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black hover:bg-neutral-800 text-tecnofil-yellow text-[11px] font-bold lowercase transition-colors";
+          link.innerHTML = `<span>ver enlace</span><span aria-hidden="true">↗</span>`;
+          content.appendChild(link);
+        }
+
+        li.appendChild(num);
+        li.appendChild(content);
+        ul.appendChild(li);
+      });
+
+      return ul;
+    }
+
+    function renderCards(sortedItems) {
+      dom.cardsGrid.innerHTML = "";
+
+      sortedItems.forEach((item, idx) => {
+        const card = document.createElement("article");
+        card.className =
+          "gift-card card-animate w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] bg-white rounded-2xl border-2 border-black/15 overflow-hidden flex flex-col";
+        card.style.animationDelay = `${Math.min(idx * 45, 360)}ms`;
+
+        // Franja superior amarilla tecnofil
+        const topStrip = document.createElement("div");
+        topStrip.className = "h-2 bg-tecnofil-yellow border-b border-black/10";
+        card.appendChild(topStrip);
+
+        // Contenido de la tarjeta
+        const body = document.createElement("div");
+        body.className = "p-5 flex-1 flex flex-col";
+
+        // Cabecera con avatar + nombre + botón editar
+        const header = document.createElement("div");
+        header.className = "flex items-center justify-between gap-3 mb-4";
+
+        const identity = document.createElement("div");
+        identity.className = "flex items-center gap-3 min-w-0";
+
+        const avatar = document.createElement("div");
+        avatar.className =
+          "relative w-14 h-14 rounded-full bg-tecnofil-yellow border-2 border-black overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm";
+        mountAvatarInto(avatar, item.name);
+
+        const nameWrap = document.createElement("div");
+        nameWrap.className = "min-w-0";
+
+        const nameEl = document.createElement("h3");
+        nameEl.className = "text-base font-bold text-black leading-tight truncate";
+        nameEl.textContent = item.name;
+
+        const subEl = document.createElement("p");
+        subEl.className = "text-xs font-light lowercase text-black/60 mt-0.5";
+        const count = (item.gifts || []).filter((g) => g && g.text && g.text.trim()).length;
+        subEl.textContent = count === 1 ? "1 regalo elegido" : `${count} regalos elegidos`;
+
+        nameWrap.appendChild(nameEl);
+        nameWrap.appendChild(subEl);
+        identity.appendChild(avatar);
+        identity.appendChild(nameWrap);
+
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className =
+          "px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-black hover:text-tecnofil-yellow text-[11px] font-bold lowercase text-black transition-colors flex-shrink-0";
+        editBtn.textContent = "editar";
+        editBtn.addEventListener("click", () => openWishModal(item.name));
+
+        header.appendChild(identity);
+        header.appendChild(editBtn);
+        body.appendChild(header);
+
+        // Lista de regalos
+        body.appendChild(buildGiftListElement(item.gifts));
+
+        card.appendChild(body);
+        dom.cardsGrid.appendChild(card);
       });
     }
 
     function renderAll() {
-      // Ordenar alfabéticamente A-Z y limitar a MAX_PERSONAS
-      const sorted = [...state.items]
-        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
-        .slice(0, MAX_PERSONAS);
+      dom.loadingState.classList.add("hidden");
+      const sortedItems = getSortedUniqueItems();
+      const total = sortedItems.length;
+      const pct = Math.min(100, Math.round((total / MAX_PERSONAS) * 100));
 
-      const count = sorted.length;
-      const pct = Math.min(100, Math.round((count / MAX_PERSONAS) * 100));
-
-      dom.participantCount.textContent = `${count} de ${MAX_PERSONAS} personas`;
+      dom.participantCount.textContent = `${total} de ${MAX_PERSONAS} personas`;
       dom.progressBar.style.width = `${pct}%`;
       dom.progressPercent.textContent = `${pct}%`;
 
       renderTeamAvatarStrip();
-      dom.loadingState.classList.add("hidden");
 
-      if (count === 0) {
-        dom.cardsGrid.classList.add("hidden");
+      if (total === 0) {
         dom.emptyNoDataState.classList.remove("hidden");
-        return;
-      }
-
-      dom.emptyNoDataState.classList.add("hidden");
-      dom.cardsGrid.classList.remove("hidden");
-
-      dom.cardsGrid.innerHTML = sorted
-        .map((person, idx) => `
-          <article
-            class="gift-card card-animate w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-[360px] bg-white rounded-2xl border-2 border-black/15 overflow-hidden flex flex-col shadow-sm"
-            style="animation-delay: ${Math.min(idx * 45, 360)}ms"
-          >
-            <!-- Franja superior amarilla tecnofil -->
-            <div class="h-2 w-full bg-tecnofil-yellow border-b border-black/10"></div>
-
-            <div class="p-5 flex-1 flex flex-col">
-              <!-- Cabecera de tarjeta: foto + nombre + editar -->
-              <div class="flex items-center justify-between gap-3 mb-4">
-                <div class="flex items-center gap-3 min-w-0">
-                  <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-tecnofil-yellow border-2 border-black overflow-hidden flex items-center justify-center flex-shrink-0 shadow-xs">
-                    <span class="text-sm font-bold text-black select-none">${escapeHtml(getInitials(person.name))}</span>
-                    ${buildAvatarImgTag(person.name)}
-                  </div>
-                  <div class="min-w-0">
-                    <h3 class="text-base font-bold text-black leading-tight break-words">
-                      ${escapeHtml(person.name)}
-                    </h3>
-                    <span class="inline-block mt-1 text-[11px] font-light lowercase text-black/55">
-                      regalos registrados
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  data-edit-name="${escapeHtml(person.name)}"
-                  class="card-edit-btn px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-black hover:text-tecnofil-yellow text-[11px] font-bold lowercase text-black transition-colors flex-shrink-0"
-                >
-                  editar
-                </button>
-              </div>
-
-              <!-- Lista numerada de los 3 regalos -->
-              <ul class="flex flex-col gap-2.5 flex-1">
-                ${buildGiftRowHtml(person.gifts?.[0], 1)}
-                ${buildGiftRowHtml(person.gifts?.[1], 2)}
-                ${buildGiftRowHtml(person.gifts?.[2], 3)}
-              </ul>
-            </div>
-          </article>
-        `)
-        .join("");
-
-      dom.cardsGrid.querySelectorAll(".card-edit-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          openModal(btn.dataset.editName);
-        });
-      });
-    }
-
-    // =========================================================================
-    // MODAL DE VISUALIZACIÓN DE REGALOS (SOLO LECTURA)
-    // =========================================================================
-
-    let currentViewingName = "";
-
-    function openViewModal(person) {
-      currentViewingName = person.name;
-      dom.viewModalName.textContent = person.name;
-      dom.viewModalAvatar.innerHTML = `
-        <span class="text-xs font-bold text-black select-none">${escapeHtml(getInitials(person.name))}</span>
-        ${buildAvatarImgTag(person.name)}
-      `;
-      dom.viewModalList.innerHTML = `
-        ${buildGiftRowHtml(person.gifts?.[0], 1)}
-        ${buildGiftRowHtml(person.gifts?.[1], 2)}
-        ${buildGiftRowHtml(person.gifts?.[2], 3)}
-      `;
-      dom.viewGiftsModal.classList.remove("hidden");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeViewModal() {
-      dom.viewGiftsModal.classList.add("hidden");
-      document.body.style.overflow = "";
-    }
-
-    document.getElementById("closeViewModalBtn").addEventListener("click", closeViewModal);
-    document.getElementById("closeViewModalFooterBtn").addEventListener("click", closeViewModal);
-    dom.viewGiftsModal.addEventListener("click", (e) => {
-      if (e.target === dom.viewGiftsModal) closeViewModal();
-    });
-    dom.viewModalEditBtn.addEventListener("click", () => {
-      const nameToEdit = currentViewingName;
-      closeViewModal();
-      openModal(nameToEdit);
-    });
-
-    // =========================================================================
-    // MODAL DE REGISTRO Y EDICIÓN
-    // =========================================================================
-
-    function populatePersonSelect(preselectedName = "") {
-      const options = [
-        `<option value="">selecciona tu nombre...</option>`,
-        ...TEAM_DIRECTORY.map(
-          (m) => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`
-        )
-      ];
-
-      // Agrega cualquier integrante extra ya guardado en base de datos si aún no está en TEAM_DIRECTORY
-      state.items.forEach((item) => {
-        if (!TEAM_DIRECTORY.some((m) => normalizeText(m.name) === normalizeText(item.name))) {
-          options.push(`<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`);
-        }
-      });
-
-      dom.personSelect.innerHTML = options.join("");
-
-      if (preselectedName) {
-        const matchOption = Array.from(dom.personSelect.options).find(
-          (opt) => normalizeText(opt.value) === normalizeText(preselectedName)
-        );
-        dom.personSelect.value = matchOption ? matchOption.value : "";
+        dom.cardsGrid.classList.add("hidden");
       } else {
-        dom.personSelect.value = "";
+        dom.emptyNoDataState.classList.add("hidden");
+        dom.cardsGrid.classList.remove("hidden");
+        renderCards(sortedItems);
       }
-
-      syncModalFieldsForSelection();
     }
+
+    // =========================================================================
+    // MODALES: REGISTRO / EDICIÓN Y LECTURA RÁPIDA
+    // =========================================================================
 
     function updateModalPreviewAvatar(name) {
       if (!name) {
         dom.modalPreviewAvatar.innerHTML = `<span class="text-xs font-bold text-black">?</span>`;
         return;
       }
-      dom.modalPreviewAvatar.innerHTML = `
-        <span class="text-xs font-bold text-black select-none">${escapeHtml(getInitials(name))}</span>
-        ${buildAvatarImgTag(name)}
-      `;
+      mountAvatarInto(dom.modalPreviewAvatar, name);
     }
 
-    function syncModalFieldsForSelection() {
-      const currentName = dom.personSelect.value;
-      updateModalPreviewAvatar(currentName);
+    function fillFormForPerson(name) {
+      const existing = findRegisteredByName(name);
+      const gifts = existing && Array.isArray(existing.gifts) ? existing.gifts : [];
 
-      // Si esa persona ya tiene deseos registrados, precarga sus datos para editar
-      const existing = state.items.find(
-        (item) => normalizeText(item.name) === normalizeText(currentName)
-      );
+      dom.gift1Text.value = gifts[0]?.text || "";
+      dom.gift1Url.value = gifts[0]?.url || "";
+      dom.gift2Text.value = gifts[1]?.text || "";
+      dom.gift2Url.value = gifts[1]?.url || "";
+      dom.gift3Text.value = gifts[2]?.text || "";
+      dom.gift3Url.value = gifts[2]?.url || "";
 
-      if (existing) {
-        dom.modalTitle.textContent = "editar mis regalos";
-        const g1 = normalizeGiftEntry(existing.gifts?.[0]);
-        const g2 = normalizeGiftEntry(existing.gifts?.[1]);
-        const g3 = normalizeGiftEntry(existing.gifts?.[2]);
-        dom.gift1Text.value = g1.text;
-        dom.gift1Url.value = g1.rawUrl;
-        dom.gift2Text.value = g2.text;
-        dom.gift2Url.value = g2.rawUrl;
-        dom.gift3Text.value = g3.text;
-        dom.gift3Url.value = g3.rawUrl;
+      dom.modalTitle.textContent = existing ? "editar mis regalos" : "registrar mis regalos";
+      updateModalPreviewAvatar(name);
+    }
+
+    function openWishModal(preselectedName = "") {
+      closeViewGiftsModal();
+      dom.formErrorMsg.classList.add("hidden");
+      dom.formErrorMsg.textContent = "";
+      populatePersonSelect();
+
+      if (preselectedName && findDirectoryEntry(preselectedName)) {
+        const canonical = findDirectoryEntry(preselectedName).name;
+        dom.personSelect.value = canonical;
+        fillFormForPerson(canonical);
       } else {
-        dom.modalTitle.textContent = "registrar mis regalos";
+        dom.personSelect.value = "";
         dom.gift1Text.value = "";
         dom.gift1Url.value = "";
         dom.gift2Text.value = "";
         dom.gift2Url.value = "";
         dom.gift3Text.value = "";
         dom.gift3Url.value = "";
+        dom.modalTitle.textContent = "registrar mis regalos";
+        updateModalPreviewAvatar("");
       }
-    }
 
-    function openModal(preselectedName = "") {
-      dom.formErrorMsg.classList.add("hidden");
-      populatePersonSelect(preselectedName);
       dom.wishModal.classList.remove("hidden");
-      document.body.style.overflow = "hidden";
+      document.body.classList.add("overflow-hidden");
     }
 
-    function closeModal() {
+    function closeWishModal() {
       dom.wishModal.classList.add("hidden");
-      document.body.style.overflow = "";
+      document.body.classList.remove("overflow-hidden");
     }
 
-    // Eventos del modal
-    document.getElementById("openModalHeaderBtn").addEventListener("click", () => openModal());
-    document.getElementById("openModalHeroBtn").addEventListener("click", () => openModal());
-    document.getElementById("openModalEmptyBtn").addEventListener("click", () => openModal());
-    document.getElementById("closeModalBtn").addEventListener("click", closeModal);
-    document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
-    dom.wishModal.addEventListener("click", (e) => {
-      if (e.target === dom.wishModal) closeModal();
-    });
-    dom.personSelect.addEventListener("change", syncModalFieldsForSelection);
+    function openViewGiftsModal(item) {
+      state.currentViewingName = item.name;
+      dom.viewModalName.textContent = item.name;
+      mountAvatarInto(dom.viewModalAvatar, item.name);
 
-    // Cerrar modales con tecla Escape
+      dom.viewModalList.innerHTML = "";
+      const listEl = buildGiftListElement(item.gifts);
+      while (listEl.firstChild) {
+        dom.viewModalList.appendChild(listEl.firstChild);
+      }
+
+      dom.viewGiftsModal.classList.remove("hidden");
+      document.body.classList.add("overflow-hidden");
+    }
+
+    function closeViewGiftsModal() {
+      dom.viewGiftsModal.classList.add("hidden");
+      document.body.classList.remove("overflow-hidden");
+    }
+
+    // =========================================================================
+    // EVENTOS DE INTERACCIÓN
+    // =========================================================================
+
+    dom.openModalHeaderBtn.addEventListener("click", () => openWishModal());
+    dom.openModalHeroBtn.addEventListener("click", () => openWishModal());
+    dom.openModalEmptyBtn.addEventListener("click", () => openWishModal());
+    dom.closeModalBtn.addEventListener("click", closeWishModal);
+    dom.cancelModalBtn.addEventListener("click", closeWishModal);
+    dom.closeViewModalBtn.addEventListener("click", closeViewGiftsModal);
+    dom.closeViewModalFooterBtn.addEventListener("click", closeViewGiftsModal);
+
+    dom.viewModalEditBtn.addEventListener("click", () => {
+      if (state.currentViewingName) {
+        openWishModal(state.currentViewingName);
+      }
+    });
+
+    dom.wishModal.addEventListener("click", (e) => {
+      if (e.target === dom.wishModal) closeWishModal();
+    });
+
+    dom.viewGiftsModal.addEventListener("click", (e) => {
+      if (e.target === dom.viewGiftsModal) closeViewGiftsModal();
+    });
+
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        if (!dom.wishModal.classList.contains("hidden")) closeModal();
-        if (!dom.viewGiftsModal.classList.contains("hidden")) closeViewModal();
+        if (!dom.wishModal.classList.contains("hidden")) closeWishModal();
+        if (!dom.viewGiftsModal.classList.contains("hidden")) closeViewGiftsModal();
       }
     });
 
-    // Guardado del formulario
+    dom.personSelect.addEventListener("change", (e) => {
+      fillFormForPerson(e.target.value);
+    });
+
     dom.wishForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       dom.formErrorMsg.classList.add("hidden");
 
-      const finalName = dom.personSelect.value.trim();
-
-      if (!finalName) {
-        dom.formErrorMsg.textContent = "Por favor selecciona tu nombre de la lista.";
+      const selectedName = dom.personSelect.value.trim();
+      if (!selectedName) {
+        dom.formErrorMsg.textContent = "Por favor, selecciona tu nombre de la lista.";
         dom.formErrorMsg.classList.remove("hidden");
         return;
       }
 
-      const gifts = [
+      const rawGifts = [
         { text: dom.gift1Text.value.trim(), url: dom.gift1Url.value.trim() },
         { text: dom.gift2Text.value.trim(), url: dom.gift2Url.value.trim() },
         { text: dom.gift3Text.value.trim(), url: dom.gift3Url.value.trim() }
-      ];
+      ].filter((g) => g.text !== "");
 
-      if (!gifts[0].text && !gifts[0].url) {
-        dom.formErrorMsg.textContent = "Por favor escribe al menos tu primer regalo deseado.";
+      if (rawGifts.length === 0) {
+        dom.formErrorMsg.textContent = "Escribe al menos un regalo deseado.";
         dom.formErrorMsg.classList.remove("hidden");
         return;
       }
 
       const payload = {
-        name: finalName,
-        gifts,
-        updatedAt: new Date().toISOString()
+        name: selectedName,
+        gifts: rawGifts.map((g) => ({
+          text: g.text,
+          url: sanitizeUrl(g.url)
+        })),
+        updatedAt: Date.now()
       };
 
       dom.submitWishBtn.disabled = true;
@@ -1114,12 +1132,13 @@
 
       try {
         await saveWish(payload);
-        closeModal();
+        closeWishModal();
         launchConfetti();
-        showToast("¡regalos guardados correctamente!");
+        showToast("¡regalos guardados en vivo!");
       } catch (err) {
-        console.error("Error al guardar regalos:", err);
-        dom.formErrorMsg.textContent = "No se pudo guardar en este momento. Intenta nuevamente.";
+        console.error("Error al guardar en Firestore:", err);
+        dom.formErrorMsg.textContent =
+          "No se pudo guardar en la nube. Verifica que Firestore Database esté en modo de prueba.";
         dom.formErrorMsg.classList.remove("hidden");
       } finally {
         dom.submitWishBtn.disabled = false;
@@ -1128,195 +1147,59 @@
     });
 
     // =========================================================================
-    // PERSISTENCIA: FIREBASE EN VIVO O RESPALDO LOCAL + CSV
+    // PERSISTENCIA EN LA NUBE: FIRESTORE DATABASE EN TIEMPO REAL
     // =========================================================================
 
     async function saveWish(payload) {
+      if (!state.useCloud || !state.db || !state.collectionPath) {
+        throw new Error("Firestore no está conectado.");
+      }
       const docId = getDocIdFromName(payload.name);
-
-      if (state.useCloud && state.db && state.collectionPath) {
-        const docRef = doc(state.db, ...state.collectionPath, docId);
-        await setDoc(docRef, payload, { merge: true });
-      } else {
-        // Actualización en memoria y localStorage
-        const idx = state.items.findIndex(
-          (item) => normalizeText(item.name) === normalizeText(payload.name)
-        );
-        if (idx >= 0) {
-          state.items[idx] = payload;
-        } else {
-          state.items.push(payload);
-        }
-        try {
-          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.items));
-        } catch (storageErr) {
-          console.warn("No se pudo guardar en localStorage:", storageErr);
-        }
-        renderAll();
-      }
+      const docRef = doc(state.db, ...state.collectionPath, docId);
+      await setDoc(docRef, payload, { merge: true });
     }
 
-    function parseCSV(text) {
-      const rows = [];
-      let currentRow = [];
-      let currentVal = "";
-      let inQuotes = false;
-
-      for (let i = 0; i < text.length; i++) {
-        const ch = text[i];
-        const next = text[i + 1];
-
-        if (inQuotes) {
-          if (ch === '"' && next === '"') {
-            currentVal += '"';
-            i++;
-          } else if (ch === '"') {
-            inQuotes = false;
-          } else {
-            currentVal += ch;
-          }
-        } else {
-          if (ch === '"') {
-            inQuotes = true;
-          } else if (ch === ",") {
-            currentRow.push(currentVal.trim());
-            currentVal = "";
-          } else if (ch === "\n" || ch === "\r") {
-            if (ch === "\r" && next === "\n") i++;
-            currentRow.push(currentVal.trim());
-            if (currentRow.some((cell) => cell !== "")) {
-              rows.push(currentRow);
-            }
-            currentRow = [];
-            currentVal = "";
-          } else {
-            currentVal += ch;
-          }
-        }
-      }
-
-      if (currentVal !== "" || currentRow.length > 0) {
-        currentRow.push(currentVal.trim());
-        if (currentRow.some((cell) => cell !== "")) {
-          rows.push(currentRow);
-        }
-      }
-      return rows;
-    }
-
-    async function loadLocalAndSheetFallback() {
-      const mergedMap = new Map();
-
-      // 1. Intenta cargar respuestas previas del Google Sheet (si responde)
-      try {
-        const res = await fetch(`${GOOGLE_SHEET_CSV_URL}&t=${Date.now()}`);
-        if (res.ok) {
-          const csvText = await res.text();
-          const rows = parseCSV(csvText);
-          if (rows.length > 1) {
-            const headers = rows[0].map((h) => normalizeText(h));
-            const nameIdx = headers.findIndex((h) => h.includes("quien") || h.includes("nombre"));
-            const g1Idx = headers.findIndex((h) => h.includes("1"));
-            const g2Idx = headers.findIndex((h) => h.includes("2"));
-            const g3Idx = headers.findIndex((h) => h.includes("3"));
-
-            const nCol = nameIdx >= 0 ? nameIdx : 0;
-            const c1 = g1Idx >= 0 ? g1Idx : 1;
-            const c2 = g2Idx >= 0 ? g2Idx : 2;
-            const c3 = g3Idx >= 0 ? g3Idx : 3;
-
-            for (let i = 1; i < rows.length; i++) {
-              const r = rows[i];
-              const name = (r[nCol] || "").trim();
-              if (!name) continue;
-              mergedMap.set(normalizeText(name), {
-                name,
-                gifts: [
-                  { text: (r[c1] || "").trim(), url: "" },
-                  { text: (r[c2] || "").trim(), url: "" },
-                  { text: (r[c3] || "").trim(), url: "" }
-                ]
-              });
-            }
-          }
-        }
-      } catch (sheetErr) {
-        console.warn("Google Sheet no disponible, usando almacenamiento local:", sheetErr);
-      }
-
-      // 2. Superpone los cambios guardados localmente
-      try {
-        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
-            parsed.forEach((item) => {
-              if (item && item.name) {
-                mergedMap.set(normalizeText(item.name), item);
-              }
-            });
-          }
-        }
-      } catch (localErr) {
-        console.warn("Error leyendo localStorage:", localErr);
-      }
-
-      state.items = Array.from(mergedMap.values());
-      dom.syncStatus.textContent = "modo local activo";
-      renderAll();
-    }
-
-    async function initApp() {
+    function initApp() {
       dom.loadingState.classList.remove("hidden");
       renderTeamAvatarStrip();
 
       try {
-        const rawConfig = typeof window.__firebase_config !== "undefined" ? window.__firebase_config : null;
-        if (rawConfig) {
-          const firebaseConfig = typeof rawConfig === "string" ? JSON.parse(rawConfig) : rawConfig;
-          const appId = typeof window.__app_id !== "undefined" ? String(window.__app_id) : "tecnofil-amigo-secreto";
+        const app = initializeApp(FIREBASE_CONFIG);
+        state.db = getFirestore(app);
+        state.collectionPath = ["amigo_secreto_regalos"];
+        state.useCloud = true;
 
-          const app = initializeApp(firebaseConfig);
-          const auth = getAuth(app);
-
-          if (typeof window.__initial_auth_token !== "undefined" && window.__initial_auth_token) {
-            await signInWithCustomToken(auth, window.__initial_auth_token);
-          } else {
-            await signInAnonymously(auth);
+        const colRef = collection(state.db, ...state.collectionPath);
+        onSnapshot(
+          colRef,
+          (snapshot) => {
+            const list = [];
+            snapshot.forEach((docSnap) => {
+              const data = docSnap.data();
+              if (data && data.name) {
+                list.push(data);
+              }
+            });
+            state.items = list;
+            dom.syncStatus.textContent = "sincronizado en vivo";
+            renderAll();
+          },
+          (err) => {
+            console.error("Error de escucha en Firestore:", err);
+            state.useCloud = false;
+            dom.loadingState.classList.add("hidden");
+            dom.syncStatus.textContent = "error de conexión con la nube";
+            renderAll();
+            showToast("revisa las reglas de firestore database");
           }
-
-          state.db = getFirestore(app);
-          state.collectionPath = ["artifacts", appId, "public", "data", "amigo_secreto_deseos"];
-          state.useCloud = true;
-
-          const colRef = collection(state.db, ...state.collectionPath);
-          onSnapshot(
-            colRef,
-            (snapshot) => {
-              const list = [];
-              snapshot.forEach((docSnap) => {
-                const data = docSnap.data();
-                if (data && data.name) {
-                  list.push(data);
-                }
-              });
-              state.items = list;
-              dom.syncStatus.textContent = "sincronizado en vivo";
-              renderAll();
-            },
-            (err) => {
-              console.error("Error de escucha en Firestore:", err);
-              state.useCloud = false;
-              loadLocalAndSheetFallback();
-            }
-          );
-          return;
-        }
+        );
       } catch (cloudErr) {
-        console.warn("No se pudo iniciar Firebase, cambiando a modo local:", cloudErr);
+        console.error("No se pudo iniciar Firebase:", cloudErr);
+        state.useCloud = false;
+        dom.loadingState.classList.add("hidden");
+        dom.syncStatus.textContent = "error al conectar con firebase";
+        renderAll();
       }
-
-      await loadLocalAndSheetFallback();
     }
 
     // Iniciar aplicación
