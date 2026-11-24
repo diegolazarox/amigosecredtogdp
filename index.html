@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>tecnofil · amigo secreto</title>
 
+  <!-- Favicon SVG con ícono de regalo en colores tecnofil -->
+  <link
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23FFDD00'/%3E%3Cg fill='none' stroke='%23000000' stroke-width='4.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='50 32 50 52 14 52 14 32'/%3E%3Crect x='10' y='22' width='44' height='10' rx='2'/%3E%3Cline x1='32' y1='52' x2='32' y2='22'/%3E%3Cpath d='M32 22h-9a5 5 0 0 1 0-10c7 0 9 10 9 10z'/%3E%3Cpath d='M32 22h9a5 5 0 0 0 0-10c-7 0-9 10-9 10z'/%3E%3C/g%3E%3C/svg%3E"
+  />
+
   <!-- Tipografía grotesca (equivalente web de Atlas Grotesk Light 300 y Bold 700) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -145,19 +152,6 @@
           </span>
         </a>
 
-        <!-- Botón principal para registrar regalos -->
-        <button
-          id="openModalHeaderBtn"
-          type="button"
-          class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-tecnofil-yellow text-xs sm:text-sm font-bold lowercase shadow-md hover:shadow-lg transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          <span>registrar mis regalos</span>
-        </button>
-
       </div>
     </div>
   </header>
@@ -202,8 +196,9 @@
         amigo secreto
       </h1>
 
-      <p class="mt-3 text-base sm:text-lg font-light lowercase text-black/85 max-w-lg mx-auto leading-relaxed">
-        descubre qué regalo desea cada integrante y registra tus 3 favoritos en segundos
+      <p class="mt-3 text-base sm:text-lg font-light lowercase text-black/85 max-w-xl mx-auto leading-relaxed">
+        descubre qué regalo desea cada integrante<br />
+        y registra tus 3 favoritos en segundos
       </p>
 
       <!-- Botón de acción destacado -->
@@ -619,7 +614,6 @@
       viewModalEditBtn: document.getElementById("viewModalEditBtn"),
 
       // Botones de apertura y cierre
-      openModalHeaderBtn: document.getElementById("openModalHeaderBtn"),
       openModalHeroBtn: document.getElementById("openModalHeroBtn"),
       openModalEmptyBtn: document.getElementById("openModalEmptyBtn"),
       closeModalBtn: document.getElementById("closeModalBtn"),
@@ -633,7 +627,7 @@
     };
 
     // =========================================================================
-    // UTILIDADES DE TEXTO, FOTOS Y SEGURIDAD
+    // FUNCIONES AUXILIARES
     // =========================================================================
 
     function normalizeKey(str) {
@@ -641,13 +635,14 @@
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, "")
-        .replace(/\s+/g, " ")
-        .trim();
+        .trim()
+        .replace(/\s+/g, " ");
     }
 
-    function getDocIdFromName(name) {
-      return normalizeKey(name).replace(/\s+/g, "_");
+    function docIdFromName(name) {
+      return normalizeKey(name)
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
     }
 
     function getInitials(name) {
@@ -657,38 +652,53 @@
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
 
-    function findDirectoryEntry(name) {
-      const key = normalizeKey(name);
-      return TEAM_DIRECTORY.find((p) => normalizeKey(p.name) === key) || null;
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function normalizeUrl(rawUrl) {
+      const cleaned = String(rawUrl || "").trim();
+      if (!cleaned) return "";
+      const withProtocol = /^https?:\/\//i.test(cleaned) ? cleaned : `https://${cleaned}`;
+      try {
+        const parsed = new URL(withProtocol);
+        return parsed.href;
+      } catch {
+        return "";
+      }
     }
 
     function getPhotoCandidates(name) {
-      const entry = findDirectoryEntry(name);
-      const file = entry ? entry.file : `Fotos_${String(name || "").trim()}.png`;
-      const encoded = encodeURIComponent(file);
+      const norm = normalizeKey(name);
+      const match = TEAM_DIRECTORY.find((p) => {
+        const pNorm = normalizeKey(p.name);
+        return pNorm === norm || pNorm.includes(norm) || norm.includes(pNorm);
+      });
+
+      const fileName = match ? match.file : `Fotos_${String(name || "").trim()}.png`;
+      const encoded = encodeURIComponent(fileName);
+
       return [
         `fotos/${encoded}`,
-        `${GITHUB_RAW_BASE}fotos/${encoded}`,
-        `${GITHUB_PAGES_BASE}fotos/${encoded}`
+        `${GITHUB_PAGES_BASE}fotos/${encoded}`,
+        `${GITHUB_RAW_BASE}fotos/${encoded}`
       ];
     }
 
-    /**
-     * Inserta la foto con respaldo en cadena dentro de un contenedor circular pequeño
-     * y muestra iniciales si ninguna URL carga.
-     */
-    function mountAvatarInto(container, name) {
-      container.innerHTML = "";
-      const fallback = document.createElement("span");
-      fallback.className = "text-xs font-bold text-black select-none";
-      fallback.textContent = getInitials(name);
-      container.appendChild(fallback);
-
+    function attachAvatarImage(containerEl, name) {
+      if (!containerEl) return;
       const candidates = getPhotoCandidates(name);
+      let idx = 0;
+
       const img = document.createElement("img");
       img.alt = name;
+      img.loading = "lazy";
       img.className = "absolute inset-0 w-full h-full object-cover object-top";
-      let idx = 0;
 
       img.onerror = () => {
         idx += 1;
@@ -700,101 +710,77 @@
       };
 
       img.src = candidates[0];
-      container.appendChild(img);
-    }
-
-    function sanitizeUrl(rawUrl) {
-      const cleaned = String(rawUrl || "").trim();
-      if (!cleaned) return "";
-      if (/^https?:\/\//i.test(cleaned)) return cleaned;
-      if (/^www\./i.test(cleaned)) return `https://${cleaned}`;
-      return "";
+      containerEl.appendChild(img);
     }
 
     let toastTimer = null;
     function showToast(message) {
       dom.toastText.textContent = message;
       dom.toastBox.classList.remove("hidden");
-      dom.toastBox.classList.add("inline-flex");
+      dom.toastBox.classList.add("flex");
       clearTimeout(toastTimer);
       toastTimer = setTimeout(() => {
         dom.toastBox.classList.add("hidden");
-        dom.toastBox.classList.remove("inline-flex");
-      }, 3000);
+        dom.toastBox.classList.remove("flex");
+      }, 3200);
     }
 
     function launchConfetti() {
-      const colors = ["#FFDD00", "#000000", "#FFFFFF", "#C87533", "#EFCD00"];
-      for (let i = 0; i < 36; i++) {
-        const piece = document.createElement("div");
+      const colors = ["#FFDD00", "#000000", "#C87533", "#FFFFFF"];
+      for (let i = 0; i < 36; i += 1) {
+        const piece = document.createElement("span");
         piece.className = "confetti-piece";
-        const size = Math.floor(Math.random() * 7) + 6;
+        const size = 6 + Math.random() * 6;
         piece.style.width = `${size}px`;
-        piece.style.height = `${size * 0.6}px`;
+        piece.style.height = `${size * 1.4}px`;
         piece.style.left = `${Math.random() * 100}vw`;
         piece.style.backgroundColor = colors[i % colors.length];
         piece.style.borderRadius = Math.random() > 0.5 ? "9999px" : "2px";
-        piece.style.animationDelay = `${(Math.random() * 0.4).toFixed(2)}s`;
-        piece.style.animationDuration = `${(1.8 + Math.random() * 0.9).toFixed(2)}s`;
+        piece.style.animationDelay = `${Math.random() * 0.4}s`;
+        piece.style.animationDuration = `${1.8 + Math.random() * 0.9}s`;
         document.body.appendChild(piece);
-        setTimeout(() => piece.remove(), 2900);
+        setTimeout(() => piece.remove(), 3000);
       }
     }
 
     // =========================================================================
-    // NORMALIZACIÓN Y BÚSQUEDA DE REGISTROS
+    // RENDERIZADO DE INTERFAZ
     // =========================================================================
 
-    function getSortedUniqueItems() {
-      const map = new Map();
-      state.items.forEach((item) => {
-        if (!item || !item.name) return;
-        const key = normalizeKey(item.name);
-        const existing = map.get(key);
-        if (!existing || (item.updatedAt || 0) >= (existing.updatedAt || 0)) {
-          map.set(key, item);
-        }
-      });
-
-      return Array.from(map.values())
-        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
-        .slice(0, MAX_PERSONAS);
+    function findRegisteredItem(name) {
+      const target = normalizeKey(name);
+      return state.items.find((item) => normalizeKey(item.name) === target) || null;
     }
 
-    function findRegisteredByName(name) {
-      const key = normalizeKey(name);
-      return getSortedUniqueItems().find((item) => normalizeKey(item.name) === key) || null;
-    }
-
-    // =========================================================================
-    // RENDERIZADO DE LA INTERFAZ
-    // =========================================================================
-
-    function populatePersonSelect() {
-      dom.personSelect.innerHTML = "";
-      const placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.textContent = "Selecciona tu nombre...";
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      dom.personSelect.appendChild(placeholder);
+    function populatePersonSelect(selectedValue = "") {
+      const currentVal = selectedValue || dom.personSelect.value;
+      dom.personSelect.innerHTML = `<option value="">selecciona tu nombre...</option>`;
 
       TEAM_DIRECTORY.forEach((person) => {
+        const isRegistered = Boolean(findRegisteredItem(person.name));
         const opt = document.createElement("option");
         opt.value = person.name;
-        opt.textContent = person.name;
+        opt.textContent = isRegistered ? `${person.name} (ya registrado)` : person.name;
         dom.personSelect.appendChild(opt);
       });
+
+      if (currentVal && TEAM_DIRECTORY.some((p) => p.name === currentVal)) {
+        dom.personSelect.value = currentVal;
+      }
+    }
+
+    function updateModalPreviewAvatar(name) {
+      dom.modalPreviewAvatar.innerHTML = `<span class="text-xs font-bold text-black">${escapeHtml(getInitials(name))}</span>`;
+      if (name) {
+        attachAvatarImage(dom.modalPreviewAvatar, name);
+      }
     }
 
     function renderTeamAvatarStrip() {
       dom.teamAvatarStrip.innerHTML = "";
-      const registeredMap = new Map(
-        getSortedUniqueItems().map((item) => [normalizeKey(item.name), item])
-      );
 
       TEAM_DIRECTORY.forEach((person) => {
-        const registered = registeredMap.get(normalizeKey(person.name));
+        const registered = findRegisteredItem(person.name);
         const firstName = person.name.split(" ")[0];
 
         const btn = document.createElement("button");
@@ -802,41 +788,36 @@
         btn.title = registered
           ? `Ver regalos de ${person.name}`
           : `Registrar regalos de ${person.name}`;
-        btn.className =
-          "group flex flex-col items-center gap-1.5 flex-shrink-0 w-16 focus:outline-none";
+        btn.className = "group flex flex-col items-center gap-1.5 flex-shrink-0 w-[64px] focus:outline-none";
 
-        const ring = document.createElement("div");
-        ring.className = registered
-          ? "relative w-12 h-12 rounded-full bg-tecnofil-yellow border-2 border-black overflow-hidden flex items-center justify-center shadow-sm transition-transform duration-200 group-hover:scale-110"
-          : "relative w-12 h-12 rounded-full bg-neutral-100 border-2 border-dashed border-black/25 overflow-hidden flex items-center justify-center opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 group-hover:border-black transition-all duration-200";
+        const ringClass = registered
+          ? "border-2 border-black ring-2 ring-tecnofil-yellow shadow-sm"
+          : "border-2 border-black/15 opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 group-hover:border-black";
 
-        mountAvatarInto(ring, person.name);
+        btn.innerHTML = `
+          <div class="relative">
+            <div data-avatar-holder class="relative w-12 h-12 rounded-full bg-tecnofil-yellow overflow-hidden flex items-center justify-center transition-all duration-200 group-hover:scale-105 ${ringClass}">
+              <span class="text-xs font-bold text-black">${escapeHtml(getInitials(person.name))}</span>
+            </div>
+            ${
+              registered
+                ? `<span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-black text-tecnofil-yellow flex items-center justify-center border border-white" aria-hidden="true">
+                     <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                   </span>`
+                : ""
+            }
+          </div>
+          <span class="text-[11px] leading-tight truncate w-full text-center ${registered ? "font-bold text-black" : "font-light text-black/60 group-hover:text-black"}">
+            ${escapeHtml(firstName)}
+          </span>
+        `;
 
-        // Insignia de check verde/amarillo si ya registró
-        const avatarWrapper = document.createElement("div");
-        avatarWrapper.className = "relative";
-        avatarWrapper.appendChild(ring);
-
-        if (registered) {
-          const badge = document.createElement("span");
-          badge.className =
-            "absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-black text-tecnofil-yellow border border-white flex items-center justify-center";
-          badge.innerHTML = `<svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-          avatarWrapper.appendChild(badge);
-        }
-
-        const label = document.createElement("span");
-        label.className = registered
-          ? "text-[11px] font-bold text-black truncate w-full text-center"
-          : "text-[11px] font-light text-black/60 group-hover:text-black truncate w-full text-center";
-        label.textContent = firstName;
-
-        btn.appendChild(avatarWrapper);
-        btn.appendChild(label);
+        const holder = btn.querySelector("[data-avatar-holder]");
+        attachAvatarImage(holder, person.name);
 
         btn.addEventListener("click", () => {
           if (registered) {
-            openViewGiftsModal(registered);
+            openViewGiftsModal(person.name);
           } else {
             openWishModal(person.name);
           }
@@ -846,189 +827,156 @@
       });
     }
 
-    function buildGiftListElement(gifts) {
-      const ul = document.createElement("ul");
-      ul.className = "flex flex-col gap-2.5";
-
+    function buildGiftItemsMarkup(gifts) {
       const validGifts = (Array.isArray(gifts) ? gifts : []).filter(
         (g) => g && String(g.text || "").trim() !== ""
       );
 
-      validGifts.forEach((gift, index) => {
-        const li = document.createElement("li");
-        li.className =
-          "p-3 rounded-xl bg-[#FAFAFA] border border-black/10 flex items-start gap-2.5";
+      if (validGifts.length === 0) {
+        return `<li class="text-xs font-light text-black/50 italic">sin regalos registrados</li>`;
+      }
 
-        const num = document.createElement("span");
-        num.className =
-          "w-6 h-6 rounded-full bg-tecnofil-yellow border border-black text-black text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5";
-        num.textContent = String(index + 1);
-
-        const content = document.createElement("div");
-        content.className = "min-w-0 flex-1";
-
-        const text = document.createElement("p");
-        text.className = "text-sm font-medium text-black leading-snug break-words";
-        text.textContent = gift.text.trim();
-        content.appendChild(text);
-
-        const safeUrl = sanitizeUrl(gift.url);
-        if (safeUrl) {
-          const link = document.createElement("a");
-          link.href = safeUrl;
-          link.target = "_blank";
-          link.rel = "noopener noreferrer";
-          link.className =
-            "mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-black hover:bg-neutral-800 text-tecnofil-yellow text-[11px] font-bold lowercase transition-colors";
-          link.innerHTML = `<span>ver enlace</span><span aria-hidden="true">↗</span>`;
-          content.appendChild(link);
-        }
-
-        li.appendChild(num);
-        li.appendChild(content);
-        ul.appendChild(li);
-      });
-
-      return ul;
-    }
-
-    function renderCards(sortedItems) {
-      dom.cardsGrid.innerHTML = "";
-
-      sortedItems.forEach((item, idx) => {
-        const card = document.createElement("article");
-        card.className =
-          "gift-card card-animate w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] bg-white rounded-2xl border-2 border-black/15 overflow-hidden flex flex-col";
-        card.style.animationDelay = `${Math.min(idx * 45, 360)}ms`;
-
-        // Franja superior amarilla tecnofil
-        const topStrip = document.createElement("div");
-        topStrip.className = "h-2 bg-tecnofil-yellow border-b border-black/10";
-        card.appendChild(topStrip);
-
-        // Contenido de la tarjeta
-        const body = document.createElement("div");
-        body.className = "p-5 flex-1 flex flex-col";
-
-        // Cabecera con avatar + nombre + botón editar
-        const header = document.createElement("div");
-        header.className = "flex items-center justify-between gap-3 mb-4";
-
-        const identity = document.createElement("div");
-        identity.className = "flex items-center gap-3 min-w-0";
-
-        const avatar = document.createElement("div");
-        avatar.className =
-          "relative w-14 h-14 rounded-full bg-tecnofil-yellow border-2 border-black overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm";
-        mountAvatarInto(avatar, item.name);
-
-        const nameWrap = document.createElement("div");
-        nameWrap.className = "min-w-0";
-
-        const nameEl = document.createElement("h3");
-        nameEl.className = "text-base font-bold text-black leading-tight truncate";
-        nameEl.textContent = item.name;
-
-        const subEl = document.createElement("p");
-        subEl.className = "text-xs font-light lowercase text-black/60 mt-0.5";
-        const count = (item.gifts || []).filter((g) => g && g.text && g.text.trim()).length;
-        subEl.textContent = count === 1 ? "1 regalo elegido" : `${count} regalos elegidos`;
-
-        nameWrap.appendChild(nameEl);
-        nameWrap.appendChild(subEl);
-        identity.appendChild(avatar);
-        identity.appendChild(nameWrap);
-
-        const editBtn = document.createElement("button");
-        editBtn.type = "button";
-        editBtn.className =
-          "px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-black hover:text-tecnofil-yellow text-[11px] font-bold lowercase text-black transition-colors flex-shrink-0";
-        editBtn.textContent = "editar";
-        editBtn.addEventListener("click", () => openWishModal(item.name));
-
-        header.appendChild(identity);
-        header.appendChild(editBtn);
-        body.appendChild(header);
-
-        // Lista de regalos
-        body.appendChild(buildGiftListElement(item.gifts));
-
-        card.appendChild(body);
-        dom.cardsGrid.appendChild(card);
-      });
+      return validGifts
+        .slice(0, 3)
+        .map((gift, index) => {
+          const safeText = escapeHtml(gift.text);
+          const safeUrl = normalizeUrl(gift.url);
+          return `
+            <li class="flex items-start gap-2.5 p-2.5 rounded-xl bg-neutral-50 border border-black/10">
+              <span class="w-6 h-6 rounded-full bg-tecnofil-yellow border border-black text-black text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                ${index + 1}
+              </span>
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-medium text-black leading-snug break-words">${safeText}</p>
+                ${
+                  safeUrl
+                    ? `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-black hover:text-tecnofil-yellow border border-black/15 text-[11px] font-bold lowercase text-black transition-colors">
+                         <span>ver enlace</span>
+                         <span aria-hidden="true">↗</span>
+                       </a>`
+                    : ""
+                }
+              </div>
+            </li>
+          `;
+        })
+        .join("");
     }
 
     function renderAll() {
-      dom.loadingState.classList.add("hidden");
-      const sortedItems = getSortedUniqueItems();
-      const total = sortedItems.length;
-      const pct = Math.min(100, Math.round((total / MAX_PERSONAS) * 100));
+      // Ordenar alfabéticamente y limitar a MAX_PERSONAS
+      const sorted = [...state.items]
+        .filter((item) => item && item.name)
+        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+        .slice(0, MAX_PERSONAS);
 
-      dom.participantCount.textContent = `${total} de ${MAX_PERSONAS} personas`;
+      const count = sorted.length;
+      const pct = Math.min(100, Math.round((count / MAX_PERSONAS) * 100));
+
+      dom.participantCount.textContent = `${count} de ${MAX_PERSONAS} personas`;
       dom.progressBar.style.width = `${pct}%`;
       dom.progressPercent.textContent = `${pct}%`;
 
       renderTeamAvatarStrip();
-
-      if (total === 0) {
-        dom.emptyNoDataState.classList.remove("hidden");
-        dom.cardsGrid.classList.add("hidden");
-      } else {
-        dom.emptyNoDataState.classList.add("hidden");
-        dom.cardsGrid.classList.remove("hidden");
-        renderCards(sortedItems);
-      }
-    }
-
-    // =========================================================================
-    // MODALES: REGISTRO / EDICIÓN Y LECTURA RÁPIDA
-    // =========================================================================
-
-    function updateModalPreviewAvatar(name) {
-      if (!name) {
-        dom.modalPreviewAvatar.innerHTML = `<span class="text-xs font-bold text-black">?</span>`;
-        return;
-      }
-      mountAvatarInto(dom.modalPreviewAvatar, name);
-    }
-
-    function fillFormForPerson(name) {
-      const existing = findRegisteredByName(name);
-      const gifts = existing && Array.isArray(existing.gifts) ? existing.gifts : [];
-
-      dom.gift1Text.value = gifts[0]?.text || "";
-      dom.gift1Url.value = gifts[0]?.url || "";
-      dom.gift2Text.value = gifts[1]?.text || "";
-      dom.gift2Url.value = gifts[1]?.url || "";
-      dom.gift3Text.value = gifts[2]?.text || "";
-      dom.gift3Url.value = gifts[2]?.url || "";
-
-      dom.modalTitle.textContent = existing ? "editar mis regalos" : "registrar mis regalos";
-      updateModalPreviewAvatar(name);
-    }
-
-    function openWishModal(preselectedName = "") {
-      closeViewGiftsModal();
-      dom.formErrorMsg.classList.add("hidden");
-      dom.formErrorMsg.textContent = "";
       populatePersonSelect();
 
-      if (preselectedName && findDirectoryEntry(preselectedName)) {
-        const canonical = findDirectoryEntry(preselectedName).name;
-        dom.personSelect.value = canonical;
-        fillFormForPerson(canonical);
+      dom.loadingState.classList.add("hidden");
+
+      if (count === 0) {
+        dom.emptyNoDataState.classList.remove("hidden");
+        dom.cardsGrid.classList.add("hidden");
+        dom.cardsGrid.innerHTML = "";
+        return;
+      }
+
+      dom.emptyNoDataState.classList.add("hidden");
+      dom.cardsGrid.classList.remove("hidden");
+      dom.cardsGrid.innerHTML = "";
+
+      sorted.forEach((item, index) => {
+        const card = document.createElement("article");
+        card.className =
+          "gift-card card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] max-w-[360px] bg-white rounded-2xl border-2 border-black/15 overflow-hidden flex flex-col";
+        card.style.animationDelay = `${Math.min(index * 45, 360)}ms`;
+
+        card.innerHTML = `
+          <div class="h-2 bg-tecnofil-yellow border-b border-black/10"></div>
+          <div class="p-5 flex-1 flex flex-col">
+            <div class="flex items-center justify-between gap-3 mb-4">
+              <div class="flex items-center gap-3 min-w-0">
+                <div data-card-avatar class="relative w-16 h-16 rounded-full bg-tecnofil-yellow border-2 border-black overflow-hidden flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <span class="text-sm font-bold text-black">${escapeHtml(getInitials(item.name))}</span>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-base font-bold text-black leading-tight break-words">${escapeHtml(item.name)}</h3>
+                  <span class="inline-block mt-1 text-[11px] font-light lowercase text-black/60">regalos elegidos</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                data-edit-btn
+                class="px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-black hover:text-tecnofil-yellow text-[11px] font-bold lowercase text-black transition-colors flex-shrink-0"
+              >
+                editar
+              </button>
+            </div>
+
+            <ul class="flex flex-col gap-2.5 flex-1">
+              ${buildGiftItemsMarkup(item.gifts)}
+            </ul>
+          </div>
+        `;
+
+        const avatarHolder = card.querySelector("[data-card-avatar]");
+        attachAvatarImage(avatarHolder, item.name);
+
+        const editBtn = card.querySelector("[data-edit-btn]");
+        editBtn.addEventListener("click", () => openWishModal(item.name));
+
+        dom.cardsGrid.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // MODALES (REGISTRO / EDICIÓN Y VISUALIZACIÓN RÁPIDA)
+    // =========================================================================
+
+    function fillFormForPerson(name) {
+      const existing = findRegisteredItem(name);
+      updateModalPreviewAvatar(name);
+
+      if (existing && Array.isArray(existing.gifts)) {
+        dom.modalTitle.textContent = "editar mis regalos";
+        dom.gift1Text.value = existing.gifts[0]?.text || "";
+        dom.gift1Url.value = existing.gifts[0]?.url || "";
+        dom.gift2Text.value = existing.gifts[1]?.text || "";
+        dom.gift2Url.value = existing.gifts[1]?.url || "";
+        dom.gift3Text.value = existing.gifts[2]?.text || "";
+        dom.gift3Url.value = existing.gifts[2]?.url || "";
       } else {
-        dom.personSelect.value = "";
+        dom.modalTitle.textContent = "registrar mis regalos";
         dom.gift1Text.value = "";
         dom.gift1Url.value = "";
         dom.gift2Text.value = "";
         dom.gift2Url.value = "";
         dom.gift3Text.value = "";
         dom.gift3Url.value = "";
-        dom.modalTitle.textContent = "registrar mis regalos";
-        updateModalPreviewAvatar("");
+      }
+    }
+
+    function openWishModal(preselectedName = "") {
+      closeViewGiftsModal();
+      dom.formErrorMsg.classList.add("hidden");
+      dom.formErrorMsg.textContent = "";
+
+      populatePersonSelect(preselectedName);
+      if (preselectedName) {
+        dom.personSelect.value = preselectedName;
+      } else {
+        dom.personSelect.value = "";
       }
 
+      fillFormForPerson(dom.personSelect.value);
       dom.wishModal.classList.remove("hidden");
       document.body.classList.add("overflow-hidden");
     }
@@ -1038,16 +986,18 @@
       document.body.classList.remove("overflow-hidden");
     }
 
-    function openViewGiftsModal(item) {
+    function openViewGiftsModal(name) {
+      const item = findRegisteredItem(name);
+      if (!item) {
+        openWishModal(name);
+        return;
+      }
+
       state.currentViewingName = item.name;
       dom.viewModalName.textContent = item.name;
-      mountAvatarInto(dom.viewModalAvatar, item.name);
-
-      dom.viewModalList.innerHTML = "";
-      const listEl = buildGiftListElement(item.gifts);
-      while (listEl.firstChild) {
-        dom.viewModalList.appendChild(listEl.firstChild);
-      }
+      dom.viewModalAvatar.innerHTML = `<span class="text-xs font-bold text-black">${escapeHtml(getInitials(item.name))}</span>`;
+      attachAvatarImage(dom.viewModalAvatar, item.name);
+      dom.viewModalList.innerHTML = buildGiftItemsMarkup(item.gifts);
 
       dom.viewGiftsModal.classList.remove("hidden");
       document.body.classList.add("overflow-hidden");
@@ -1059,35 +1009,126 @@
     }
 
     // =========================================================================
+    // CONEXIÓN A FIRESTORE EN VIVO Y GUARDADO
+    // =========================================================================
+
+    function initCloud() {
+      dom.loadingState.classList.remove("hidden");
+      dom.syncStatus.textContent = "conectando...";
+
+      try {
+        const app = initializeApp(FIREBASE_CONFIG);
+        state.db = getFirestore(app);
+        state.collectionPath = "regalos_tecnofil";
+        state.useCloud = true;
+
+        const colRef = collection(state.db, state.collectionPath);
+        onSnapshot(
+          colRef,
+          (snapshot) => {
+            const loaded = [];
+            snapshot.forEach((docSnap) => {
+              const data = docSnap.data();
+              if (data && data.name) {
+                loaded.push({
+                  id: docSnap.id,
+                  name: data.name,
+                  gifts: Array.isArray(data.gifts) ? data.gifts : [],
+                  updatedAt: data.updatedAt || 0
+                });
+              }
+            });
+            state.items = loaded;
+            dom.syncStatus.textContent = "sincronizado en vivo";
+            renderAll();
+          },
+          (error) => {
+            console.error("Error de sincronización Firestore:", error);
+            dom.syncStatus.textContent = "sin conexión a la nube";
+            dom.loadingState.classList.add("hidden");
+            renderAll();
+            showToast("revisa los permisos de firestore");
+          }
+        );
+      } catch (error) {
+        console.error("Error al inicializar Firebase:", error);
+        dom.syncStatus.textContent = "error de conexión";
+        dom.loadingState.classList.add("hidden");
+        renderAll();
+      }
+    }
+
+    async function handleFormSubmit(event) {
+      event.preventDefault();
+      dom.formErrorMsg.classList.add("hidden");
+      dom.formErrorMsg.textContent = "";
+
+      const selectedName = dom.personSelect.value.trim();
+      if (!selectedName) {
+        dom.formErrorMsg.textContent = "Por favor selecciona tu nombre en la lista.";
+        dom.formErrorMsg.classList.remove("hidden");
+        return;
+      }
+
+      const g1Text = dom.gift1Text.value.trim();
+      if (!g1Text) {
+        dom.formErrorMsg.textContent = "Escribe al menos tu primer regalo deseado.";
+        dom.formErrorMsg.classList.remove("hidden");
+        return;
+      }
+
+      const gifts = [
+        { text: g1Text, url: normalizeUrl(dom.gift1Url.value) },
+        { text: dom.gift2Text.value.trim(), url: normalizeUrl(dom.gift2Url.value) },
+        { text: dom.gift3Text.value.trim(), url: normalizeUrl(dom.gift3Url.value) }
+      ].filter((g) => g.text !== "");
+
+      if (!state.useCloud || !state.db) {
+        dom.formErrorMsg.textContent = "No hay conexión activa con la base de datos.";
+        dom.formErrorMsg.classList.remove("hidden");
+        return;
+      }
+
+      const originalBtnHtml = dom.submitWishBtn.innerHTML;
+      dom.submitWishBtn.disabled = true;
+      dom.submitWishBtn.innerHTML = `<span>guardando...</span>`;
+
+      try {
+        const docId = docIdFromName(selectedName);
+        await setDoc(doc(state.db, state.collectionPath, docId), {
+          name: selectedName,
+          gifts,
+          updatedAt: Date.now()
+        });
+
+        closeWishModal();
+        launchConfetti();
+        showToast("¡regalos guardados en vivo!");
+      } catch (error) {
+        console.error("Error al guardar en Firestore:", error);
+        dom.formErrorMsg.textContent =
+          "No se pudo guardar en la nube. Verifica que Firestore esté en modo de prueba.";
+        dom.formErrorMsg.classList.remove("hidden");
+      } finally {
+        dom.submitWishBtn.disabled = false;
+        dom.submitWishBtn.innerHTML = originalBtnHtml;
+      }
+    }
+
+    // =========================================================================
     // EVENTOS DE INTERACCIÓN
     // =========================================================================
 
-    dom.openModalHeaderBtn.addEventListener("click", () => openWishModal());
     dom.openModalHeroBtn.addEventListener("click", () => openWishModal());
     dom.openModalEmptyBtn.addEventListener("click", () => openWishModal());
     dom.closeModalBtn.addEventListener("click", closeWishModal);
     dom.cancelModalBtn.addEventListener("click", closeWishModal);
+
     dom.closeViewModalBtn.addEventListener("click", closeViewGiftsModal);
     dom.closeViewModalFooterBtn.addEventListener("click", closeViewGiftsModal);
-
     dom.viewModalEditBtn.addEventListener("click", () => {
       if (state.currentViewingName) {
         openWishModal(state.currentViewingName);
-      }
-    });
-
-    dom.wishModal.addEventListener("click", (e) => {
-      if (e.target === dom.wishModal) closeWishModal();
-    });
-
-    dom.viewGiftsModal.addEventListener("click", (e) => {
-      if (e.target === dom.viewGiftsModal) closeViewGiftsModal();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        if (!dom.wishModal.classList.contains("hidden")) closeWishModal();
-        if (!dom.viewGiftsModal.classList.contains("hidden")) closeViewGiftsModal();
       }
     });
 
@@ -1095,115 +1136,26 @@
       fillFormForPerson(e.target.value);
     });
 
-    dom.wishForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      dom.formErrorMsg.classList.add("hidden");
+    dom.wishForm.addEventListener("submit", handleFormSubmit);
 
-      const selectedName = dom.personSelect.value.trim();
-      if (!selectedName) {
-        dom.formErrorMsg.textContent = "Por favor, selecciona tu nombre de la lista.";
-        dom.formErrorMsg.classList.remove("hidden");
-        return;
-      }
-
-      const rawGifts = [
-        { text: dom.gift1Text.value.trim(), url: dom.gift1Url.value.trim() },
-        { text: dom.gift2Text.value.trim(), url: dom.gift2Url.value.trim() },
-        { text: dom.gift3Text.value.trim(), url: dom.gift3Url.value.trim() }
-      ].filter((g) => g.text !== "");
-
-      if (rawGifts.length === 0) {
-        dom.formErrorMsg.textContent = "Escribe al menos un regalo deseado.";
-        dom.formErrorMsg.classList.remove("hidden");
-        return;
-      }
-
-      const payload = {
-        name: selectedName,
-        gifts: rawGifts.map((g) => ({
-          text: g.text,
-          url: sanitizeUrl(g.url)
-        })),
-        updatedAt: Date.now()
-      };
-
-      dom.submitWishBtn.disabled = true;
-      dom.submitWishBtn.textContent = "guardando...";
-
-      try {
-        await saveWish(payload);
+    // Cerrar modales al hacer clic fuera del cuadro o presionar Escape
+    dom.wishModal.addEventListener("click", (e) => {
+      if (e.target === dom.wishModal) closeWishModal();
+    });
+    dom.viewGiftsModal.addEventListener("click", (e) => {
+      if (e.target === dom.viewGiftsModal) closeViewGiftsModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
         closeWishModal();
-        launchConfetti();
-        showToast("¡regalos guardados en vivo!");
-      } catch (err) {
-        console.error("Error al guardar en Firestore:", err);
-        dom.formErrorMsg.textContent =
-          "No se pudo guardar en la nube. Verifica que Firestore Database esté en modo de prueba.";
-        dom.formErrorMsg.classList.remove("hidden");
-      } finally {
-        dom.submitWishBtn.disabled = false;
-        dom.submitWishBtn.textContent = "guardar mis regalos";
+        closeViewGiftsModal();
       }
     });
 
-    // =========================================================================
-    // PERSISTENCIA EN LA NUBE: FIRESTORE DATABASE EN TIEMPO REAL
-    // =========================================================================
-
-    async function saveWish(payload) {
-      if (!state.useCloud || !state.db || !state.collectionPath) {
-        throw new Error("Firestore no está conectado.");
-      }
-      const docId = getDocIdFromName(payload.name);
-      const docRef = doc(state.db, ...state.collectionPath, docId);
-      await setDoc(docRef, payload, { merge: true });
-    }
-
-    function initApp() {
-      dom.loadingState.classList.remove("hidden");
-      renderTeamAvatarStrip();
-
-      try {
-        const app = initializeApp(FIREBASE_CONFIG);
-        state.db = getFirestore(app);
-        state.collectionPath = ["amigo_secreto_regalos"];
-        state.useCloud = true;
-
-        const colRef = collection(state.db, ...state.collectionPath);
-        onSnapshot(
-          colRef,
-          (snapshot) => {
-            const list = [];
-            snapshot.forEach((docSnap) => {
-              const data = docSnap.data();
-              if (data && data.name) {
-                list.push(data);
-              }
-            });
-            state.items = list;
-            dom.syncStatus.textContent = "sincronizado en vivo";
-            renderAll();
-          },
-          (err) => {
-            console.error("Error de escucha en Firestore:", err);
-            state.useCloud = false;
-            dom.loadingState.classList.add("hidden");
-            dom.syncStatus.textContent = "error de conexión con la nube";
-            renderAll();
-            showToast("revisa las reglas de firestore database");
-          }
-        );
-      } catch (cloudErr) {
-        console.error("No se pudo iniciar Firebase:", cloudErr);
-        state.useCloud = false;
-        dom.loadingState.classList.add("hidden");
-        dom.syncStatus.textContent = "error al conectar con firebase";
-        renderAll();
-      }
-    }
-
-    // Iniciar aplicación
-    initApp();
+    // Iniciar la aplicación al cargar la página
+    renderTeamAvatarStrip();
+    populatePersonSelect();
+    initCloud();
   </script>
 </body>
 </html>
