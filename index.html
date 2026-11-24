@@ -8,7 +8,7 @@
   <!-- Tipografía grotesca (equivalente web de Atlas Grotesk Light 300 y Bold 700) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -26,6 +26,7 @@
               yellow: '#FFDD00',
               yellowHover: '#EFCD00',
               yellowBorder: '#DBBD00',
+              copper: '#C87533',
               black: '#000000',
               white: '#FFFFFF',
             }
@@ -36,176 +37,249 @@
   </script>
 
   <style>
-    /* Entrada suave de tarjetas */
+    /* Entrada suave y dinámica de tarjetas */
     @keyframes fadeInUp {
       from {
         opacity: 0;
-        transform: translateY(6px);
+        transform: translateY(14px) scale(0.98);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
     }
 
     .card-animate {
-      animation: fadeInUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+      animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
-    /* Animación de giro para el botón actualizar */
+    /* Animación de giro */
     @keyframes spinSlow {
-      to {
-        transform: rotate(360deg);
-      }
+      to { transform: rotate(360deg); }
     }
 
     .spin-active {
       animation: spinSlow 0.75s linear infinite;
     }
 
-    /* Animación de barra de carga tecnofil */
-    @keyframes loaderSlide {
+    /* Animación sutil de flotación para elementos decorativos del hero */
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-6px) rotate(3deg); }
+    }
+
+    .float-soft {
+      animation: floatSoft 4.5s ease-in-out infinite;
+    }
+
+    /* Partículas de confeti al guardar */
+    @keyframes confettiFall {
       0% {
-        transform: translateX(-100%);
+        transform: translateY(-20px) rotate(0deg);
+        opacity: 1;
       }
       100% {
-        transform: translateX(300%);
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
       }
     }
 
-    .loader-bar {
-      animation: loaderSlide 1.1s ease-in-out infinite;
+    .confetti-piece {
+      position: fixed;
+      top: -12px;
+      z-index: 100;
+      pointer-events: none;
+      animation: confettiFall 2.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    /* Patrón sutil de puntos para el hero amarillo */
+    .hero-pattern {
+      background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1.25px, transparent 1.25px);
+      background-size: 20px 20px;
+    }
+
+    /* Tarjeta con sombra moderna y acento tecnofil */
+    .gift-card {
+      transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    }
+
+    .gift-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 18px 34px -14px rgba(0, 0, 0, 0.16), 0 0 0 2px #000000;
+    }
+
+    /* Scrollbar limpio para la tira de avatares en móviles */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
     }
   </style>
 </head>
 
-<body class="bg-white text-black font-sans antialiased min-h-screen flex flex-col selection:bg-tecnofil-yellow selection:text-black">
+<body class="bg-[#FAFAFA] text-black font-sans antialiased min-h-screen flex flex-col selection:bg-tecnofil-yellow selection:text-black overflow-x-hidden">
 
   <!-- ===================================================================== -->
-  <!-- HEADER: BARRA BLANCA MINIMALISTA CON LOGO A LA IZQUIERDA              -->
+  <!-- HEADER: BARRA BLANCA FIJA CON LOGO TECNOFIL A LA IZQUIERDA            -->
   <!-- ===================================================================== -->
-  <header class="bg-white border-b border-black/15">
-    <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-4">
-      <div class="flex flex-wrap items-center justify-between gap-4">
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-black/10">
+    <div class="max-w-[1140px] mx-auto px-4 sm:px-6 py-3.5">
+      <div class="flex items-center justify-between gap-3">
 
-        <!-- Logotipo horizontal oficial tecnofil (gap 1/4x = 10px para símbolo de 40px) -->
-        <a href="#top" class="inline-flex items-center gap-[10px] focus:outline-none" aria-label="tecnofil">
-          <svg class="w-10 h-10 flex-shrink-0" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Logotipo horizontal oficial tecnofil -->
+        <a href="#top" class="inline-flex items-center gap-[10px] focus:outline-none group" aria-label="tecnofil">
+          <svg class="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0 transition-transform duration-300 group-hover:rotate-12" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <defs>
               <mask id="tecnofil-cut-header">
                 <rect width="40" height="40" fill="white" />
-                <!-- Rectángulo izquierdo más grueso hasta el centro -->
                 <rect x="0" y="15.5" width="20" height="9" fill="black" />
-                <!-- Rendija derecha más delgada desde el centro hasta el borde -->
                 <rect x="20" y="18.2" width="20" height="3.6" fill="black" />
               </mask>
             </defs>
             <circle cx="20" cy="20" r="20" fill="#FFDD00" mask="url(#tecnofil-cut-header)" />
           </svg>
-          <span class="text-[28px] font-bold tracking-[-0.04em] lowercase leading-none text-black">
+          <span class="text-[24px] sm:text-[28px] font-bold tracking-[-0.04em] lowercase leading-none text-black">
             tecnofil
           </span>
         </a>
 
-        <!-- Botón hacia el formulario de Microsoft Forms (fondo amarillo, texto negro) -->
-        <a
-          href="https://forms.cloud.microsoft/r/6GLTukXTrJ"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-black text-xs sm:text-sm font-bold lowercase transition-colors focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
+        <!-- Botón principal para registrar regalos -->
+        <button
+          id="openModalHeaderBtn"
+          type="button"
+          class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-tecnofil-yellow text-xs sm:text-sm font-bold lowercase shadow-md hover:shadow-lg transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2"
         >
-          <span>registrar mis deseos ↗</span>
-        </a>
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          <span>registrar mis regalos</span>
+        </button>
 
       </div>
     </div>
   </header>
 
   <!-- ===================================================================== -->
-  <!-- HERO: BLOQUE AMARILLO #FFDD00 CENTRADO                                -->
+  <!-- HERO: BLOQUE AMARILLO #FFDD00 LLAMATIVO CON ELEMENTOS GRÁFICOS        -->
   <!-- ===================================================================== -->
-  <section id="top" class="bg-tecnofil-yellow text-black border-b border-tecnofil-yellowBorder">
-    <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-10 sm:py-14 text-center">
-      <h1 class="text-4xl sm:text-5xl font-bold tracking-[-0.03em] lowercase leading-[1.08] text-black">
+  <section id="top" class="relative bg-tecnofil-yellow hero-pattern text-black overflow-hidden border-b-2 border-black">
+
+    <!-- Marca de agua geométrica del isotipo tecnofil (izquierda y derecha) -->
+    <svg class="hidden md:block absolute -left-16 -top-12 w-64 h-64 opacity-[0.07] pointer-events-none select-none" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <defs>
+        <mask id="hero-watermark-left">
+          <rect width="40" height="40" fill="white" />
+          <rect x="0" y="15.5" width="20" height="9" fill="black" />
+          <rect x="20" y="18.2" width="20" height="3.6" fill="black" />
+        </mask>
+      </defs>
+      <circle cx="20" cy="20" r="20" fill="#000000" mask="url(#hero-watermark-left)" />
+    </svg>
+
+    <svg class="hidden md:block absolute -right-14 -bottom-16 w-72 h-72 opacity-[0.07] pointer-events-none select-none rotate-180" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <defs>
+        <mask id="hero-watermark-right">
+          <rect width="40" height="40" fill="white" />
+          <rect x="0" y="15.5" width="20" height="9" fill="black" />
+          <rect x="20" y="18.2" width="20" height="3.6" fill="black" />
+        </mask>
+      </defs>
+      <circle cx="20" cy="20" r="20" fill="#000000" mask="url(#hero-watermark-right)" />
+    </svg>
+
+    <div class="relative max-w-[1140px] mx-auto px-4 sm:px-6 pt-10 pb-16 sm:pt-14 sm:pb-20 text-center">
+
+      <!-- Insignia superior -->
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black text-white text-xs font-bold lowercase tracking-wide mb-4 shadow-sm float-soft">
+        <span class="w-2 h-2 rounded-full bg-tecnofil-yellow"></span>
+        <span>intercambio del equipo</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-[-0.04em] lowercase leading-[1.03] text-black">
         amigo secreto
       </h1>
-      <p class="mt-3 text-base sm:text-lg font-light lowercase text-black leading-relaxed">
-        lista de regalos del equipo
+
+      <p class="mt-3 text-base sm:text-lg font-light lowercase text-black/85 max-w-lg mx-auto leading-relaxed">
+        descubre qué regalo desea cada integrante y registra tus 3 favoritos en segundos
       </p>
+
+      <!-- Botón de acción destacado -->
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+        <button
+          id="openModalHeroBtn"
+          type="button"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-black hover:bg-neutral-900 text-tecnofil-yellow text-sm font-bold lowercase shadow-[0_10px_25px_-8px_rgba(0,0,0,0.45)] hover:-translate-y-0.5 transition-all active:scale-95"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="20 12 20 22 4 22 4 12" />
+            <rect x="2" y="7" width="20" height="5" />
+            <line x1="12" y1="22" x2="12" y2="7" />
+            <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+            <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+          </svg>
+          <span>anotar mis regalos</span>
+        </button>
+      </div>
     </div>
   </section>
 
   <!-- ===================================================================== -->
-  <!-- BARRA DE ESTADO CENTRADA (CONTADOR 13 DE 13 + ACTUALIZAR)             -->
+  <!-- PANEL FLOTANTE: PROGRESO 13 DE 13 + CARAS INTERACTIVAS DEL EQUIPO     -->
   <!-- ===================================================================== -->
-  <section aria-label="estado de la lista" class="bg-white border-b border-black/10">
-    <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded bg-tecnofil-yellow text-black text-xs font-bold lowercase border border-tecnofil-yellowBorder">
-        <span class="w-2 h-2 rounded-full bg-black"></span>
-        <span id="participantCount">0 de 13 personas</span>
+  <section aria-label="progreso del equipo" class="relative z-20 max-w-[1140px] w-full mx-auto px-4 sm:px-6 -mt-9">
+    <div class="bg-white rounded-2xl border-2 border-black shadow-[0_12px_30px_-12px_rgba(0,0,0,0.14)] p-4 sm:p-5">
+
+      <!-- Fila superior: contador + barra de progreso -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center justify-center sm:justify-start gap-2.5">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-tecnofil-yellow border border-black/15 text-xs font-bold lowercase text-black">
+            <span class="w-2 h-2 rounded-full bg-black"></span>
+            <span id="participantCount">0 de 13 personas</span>
+          </span>
+          <span id="syncStatus" class="text-xs font-light lowercase text-black/60">
+            conectando...
+          </span>
+        </div>
+
+        <!-- Barra de progreso visual -->
+        <div class="flex items-center gap-3 w-full sm:w-64">
+          <div class="flex-1 h-2.5 bg-neutral-200 rounded-full overflow-hidden border border-black/10">
+            <div id="progressBar" class="h-full bg-black rounded-full transition-all duration-500 ease-out" style="width: 0%;"></div>
+          </div>
+          <span id="progressPercent" class="text-xs font-bold text-black w-9 text-right">0%</span>
+        </div>
       </div>
 
-      <button
-        id="refreshBtn"
-        type="button"
-        class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded bg-white hover:bg-neutral-100 border border-black/20 text-xs font-bold lowercase text-black transition-colors focus:outline-none focus:ring-2 focus:ring-black disabled:opacity-60"
-      >
-        <svg id="refreshIcon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="23 4 23 10 17 10" />
-          <polyline points="1 20 1 14 7 14" />
-          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-        </svg>
-        <span>actualizar</span>
-      </button>
+      <!-- Tira interactiva con las fotos del equipo (clic para ver o registrar) -->
+      <div class="mt-4 pt-4 border-t border-black/10">
+        <div id="teamAvatarStrip" class="flex items-center justify-start sm:justify-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
+          <!-- Generado dinámicamente -->
+        </div>
+      </div>
 
-      <span id="syncStatus" class="text-xs font-light lowercase text-black">
-        sincronizando...
-      </span>
     </div>
   </section>
 
   <!-- ===================================================================== -->
-  <!-- CONTENIDO PRINCIPAL: ESTADOS Y GRILLA FLEXBOX CENTRADA                -->
+  <!-- CONTENIDO PRINCIPAL: ESTADOS Y GRILLA CENTRADA DE TARJETAS            -->
   <!-- ===================================================================== -->
-  <main class="flex-1 max-w-[1120px] w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
+  <main class="flex-1 max-w-[1140px] w-full mx-auto px-4 sm:px-6 py-8 sm:py-10">
 
-    <!-- Estado de carga (animación negro / amarillo tecnofil) -->
-    <div id="loadingState" class="hidden py-16 px-6 text-center bg-white rounded border border-black/15">
-      <div class="w-12 h-12 mx-auto rounded-full bg-tecnofil-yellow flex items-center justify-center mb-4">
+    <!-- Estado de carga -->
+    <div id="loadingState" class="hidden py-16 px-6 text-center bg-white rounded-2xl border border-black/10 shadow-sm">
+      <div class="w-12 h-12 mx-auto rounded-full bg-tecnofil-yellow flex items-center justify-center mb-4 border border-black/15">
         <span class="w-5 h-5 border-2 border-black border-t-transparent rounded-full spin-active"></span>
       </div>
-      <p class="text-sm font-bold lowercase text-black">cargando lista...</p>
-      <div class="w-44 h-1 bg-black/10 rounded overflow-hidden mx-auto mt-3">
-        <div class="w-1/3 h-full bg-black loader-bar"></div>
-      </div>
-    </div>
-
-    <!-- Estado de error con botón reintentar (sin alert()) -->
-    <div id="errorState" class="hidden py-14 px-6 text-center bg-white rounded border border-black">
-      <div class="w-12 h-12 mx-auto rounded-full bg-tecnofil-yellow text-black flex items-center justify-center mb-4">
-        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-      </div>
-      <h2 class="text-base font-bold lowercase text-black">no se pudo cargar la lista</h2>
-      <p id="errorMessage" class="mt-1.5 text-sm font-light text-black max-w-md mx-auto">
-        Ocurrió un problema al conectar con la hoja de respuestas. Verifica tu conexión e intenta nuevamente.
-      </p>
-      <button
-        id="retryBtn"
-        type="button"
-        class="mt-5 inline-flex items-center justify-center px-5 py-2.5 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-black text-xs font-bold lowercase transition-colors"
-      >
-        reintentar
-      </button>
+      <p class="text-sm font-bold lowercase text-black">cargando lista de regalos...</p>
     </div>
 
     <!-- Estado vacío: sin respuestas registradas aún -->
-    <div id="emptyNoDataState" class="hidden py-16 px-6 text-center bg-white rounded border border-black/15">
-      <div class="w-12 h-12 mx-auto rounded-full bg-tecnofil-yellow text-black flex items-center justify-center mb-4">
-        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <div id="emptyNoDataState" class="hidden py-14 px-6 text-center bg-white rounded-2xl border-2 border-dashed border-black/20">
+      <div class="w-16 h-16 mx-auto rounded-2xl bg-tecnofil-yellow text-black flex items-center justify-center mb-4 border-2 border-black shadow-sm">
+        <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <polyline points="20 12 20 22 4 22 4 12" />
           <rect x="2" y="7" width="20" height="5" />
           <line x1="12" y1="22" x2="12" y2="7" />
@@ -213,32 +287,235 @@
           <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
         </svg>
       </div>
-      <h2 class="text-base font-bold lowercase text-black">aún no hay respuestas registradas</h2>
-      <p class="mt-1.5 text-sm font-light text-black max-w-md mx-auto">
-        Sé la primera persona en registrar tus deseos en el formulario.
+      <h2 class="text-lg font-bold lowercase text-black">¡sé la primera persona en participar!</h2>
+      <p class="mt-1.5 text-sm font-light text-black/75 max-w-md mx-auto">
+        Haz clic en tu foto arriba o presiona el botón para anotar los 3 regalos que te gustaría recibir.
       </p>
-      <a
-        href="https://forms.cloud.microsoft/r/6GLTukXTrJ"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="mt-5 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-black text-xs font-bold lowercase transition-colors"
+      <button
+        id="openModalEmptyBtn"
+        type="button"
+        class="mt-5 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border-2 border-black text-black text-xs sm:text-sm font-bold lowercase transition-all shadow-sm hover:-translate-y-0.5"
       >
-        <span>registrar mis deseos ↗</span>
-      </a>
+        <span>+ registrar mis regalos</span>
+      </button>
     </div>
 
-    <!-- Grilla Flexbox centrada (incluye centrado automático de la última fila) -->
+    <!-- Grilla Flexbox centrada (ordena A-Z automáticamente y centra la última fila) -->
     <div id="cardsGrid" class="hidden flex flex-wrap justify-center gap-6"></div>
 
   </main>
 
   <!-- ===================================================================== -->
+  <!-- MODAL DE REGISTRO / EDICIÓN DE DESEOS                                 -->
+  <!-- ===================================================================== -->
+  <div id="wishModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="relative w-full max-w-lg bg-white rounded-2xl border-2 border-black shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
+
+      <!-- Cabecera amarilla del modal -->
+      <div class="bg-tecnofil-yellow px-5 sm:px-6 py-4 border-b-2 border-black flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div id="modalPreviewAvatar" class="relative w-11 h-11 rounded-full bg-white border-2 border-black overflow-hidden flex items-center justify-center flex-shrink-0">
+            <span class="text-xs font-bold text-black">?</span>
+          </div>
+          <div>
+            <h2 id="modalTitle" class="text-lg font-bold lowercase text-black leading-tight">
+              registrar mis regalos
+            </h2>
+            <p class="text-xs font-light lowercase text-black/80">
+              elige tu nombre y anota tus 3 regalos favoritos
+            </p>
+          </div>
+        </div>
+
+        <button
+          id="closeModalBtn"
+          type="button"
+          aria-label="cerrar"
+          class="w-9 h-9 rounded-full bg-black/10 hover:bg-black hover:text-tecnofil-yellow text-black flex items-center justify-center transition-colors"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Formulario scrollable -->
+      <form id="wishForm" class="p-5 sm:p-6 space-y-4 overflow-y-auto">
+
+        <!-- Selector de integrante -->
+        <div>
+          <label for="personSelect" class="block text-xs font-bold lowercase text-black mb-1.5">
+            ¿quién eres?
+          </label>
+          <select
+            id="personSelect"
+            required
+            class="w-full px-3.5 py-2.5 rounded-xl bg-neutral-50 border-2 border-black/15 focus:border-black focus:bg-white text-sm font-medium text-black focus:outline-none transition-colors"
+          >
+            <!-- Opciones generadas por JS -->
+          </select>
+        </div>
+
+        <!-- Regalo 1 -->
+        <div class="p-3.5 rounded-xl bg-neutral-50 border border-black/10 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-tecnofil-yellow border border-black text-black text-xs font-bold flex items-center justify-center">1</span>
+            <label for="gift1Text" class="text-xs font-bold lowercase text-black">primer regalo deseado</label>
+          </div>
+          <input
+            id="gift1Text"
+            type="text"
+            required
+            placeholder="Ej. Audífonos inalámbricos color negro"
+            class="w-full px-3 py-2 rounded-lg bg-white border border-black/15 focus:border-black text-sm text-black focus:outline-none"
+          />
+          <input
+            id="gift1Url"
+            type="url"
+            placeholder="enlace de referencia (opcional, ej. https://...)"
+            class="w-full px-3 py-1.5 rounded-lg bg-white border border-black/10 focus:border-black text-xs text-black placeholder:text-black/40 focus:outline-none"
+          />
+        </div>
+
+        <!-- Regalo 2 -->
+        <div class="p-3.5 rounded-xl bg-neutral-50 border border-black/10 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-tecnofil-yellow border border-black text-black text-xs font-bold flex items-center justify-center">2</span>
+            <label for="gift2Text" class="text-xs font-bold lowercase text-black">segundo regalo deseado</label>
+          </div>
+          <input
+            id="gift2Text"
+            type="text"
+            placeholder="Ej. Termo térmico de acero inoxidable"
+            class="w-full px-3 py-2 rounded-lg bg-white border border-black/15 focus:border-black text-sm text-black focus:outline-none"
+          />
+          <input
+            id="gift2Url"
+            type="url"
+            placeholder="enlace de referencia (opcional, ej. https://...)"
+            class="w-full px-3 py-1.5 rounded-lg bg-white border border-black/10 focus:border-black text-xs text-black placeholder:text-black/40 focus:outline-none"
+          />
+        </div>
+
+        <!-- Regalo 3 -->
+        <div class="p-3.5 rounded-xl bg-neutral-50 border border-black/10 space-y-2">
+          <div class="flex items-center gap-2">
+            <span class="w-6 h-6 rounded-full bg-tecnofil-yellow border border-black text-black text-xs font-bold flex items-center justify-center">3</span>
+            <label for="gift3Text" class="text-xs font-bold lowercase text-black">tercer regalo deseado</label>
+          </div>
+          <input
+            id="gift3Text"
+            type="text"
+            placeholder="Ej. Libro o gift card de tienda"
+            class="w-full px-3 py-2 rounded-lg bg-white border border-black/15 focus:border-black text-sm text-black focus:outline-none"
+          />
+          <input
+            id="gift3Url"
+            type="url"
+            placeholder="enlace de referencia (opcional, ej. https://...)"
+            class="w-full px-3 py-1.5 rounded-lg bg-white border border-black/10 focus:border-black text-xs text-black placeholder:text-black/40 focus:outline-none"
+          />
+        </div>
+
+        <!-- Mensaje de error interno del formulario -->
+        <p id="formErrorMsg" class="hidden text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></p>
+
+        <!-- Botones del formulario -->
+        <div class="pt-2 flex items-center justify-end gap-2.5">
+          <button
+            id="cancelModalBtn"
+            type="button"
+            class="px-4 py-2.5 rounded-full bg-white hover:bg-neutral-100 border border-black/20 text-xs font-bold lowercase text-black transition-colors"
+          >
+            cancelar
+          </button>
+          <button
+            id="submitWishBtn"
+            type="submit"
+            class="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-black hover:bg-neutral-800 text-tecnofil-yellow text-xs sm:text-sm font-bold lowercase shadow-md transition-all active:scale-95 disabled:opacity-60"
+          >
+            <span>guardar mis regalos</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL DE VISUALIZACIÓN DE REGALOS (AL HACER CLIC EN UNA FOTO ARRIBA)  -->
+  <!-- ===================================================================== -->
+  <div id="viewGiftsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="relative w-full max-w-md bg-white rounded-2xl border-2 border-black shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+
+      <!-- Cabecera amarilla con foto pequeña y nombre -->
+      <div class="bg-tecnofil-yellow px-5 py-4 border-b-2 border-black flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div id="viewModalAvatar" class="relative w-12 h-12 rounded-full bg-white border-2 border-black overflow-hidden flex items-center justify-center flex-shrink-0">
+            <span class="text-xs font-bold text-black">?</span>
+          </div>
+          <div class="min-w-0">
+            <h2 id="viewModalName" class="text-base sm:text-lg font-bold text-black leading-tight truncate">
+              Nombre
+            </h2>
+            <p class="text-xs font-light lowercase text-black/80">
+              regalos elegidos
+            </p>
+          </div>
+        </div>
+
+        <button
+          id="closeViewModalBtn"
+          type="button"
+          aria-label="cerrar"
+          class="w-9 h-9 rounded-full bg-black/10 hover:bg-black hover:text-tecnofil-yellow text-black flex items-center justify-center transition-colors flex-shrink-0"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Lista de regalos elegidos -->
+      <div class="p-5 overflow-y-auto">
+        <ul id="viewModalList" class="flex flex-col gap-2.5">
+          <!-- Generado dinámicamente -->
+        </ul>
+
+        <div class="mt-5 pt-3 border-t border-black/10 flex items-center justify-between gap-2">
+          <button
+            id="viewModalEditBtn"
+            type="button"
+            class="px-4 py-2 rounded-full bg-neutral-100 hover:bg-black hover:text-tecnofil-yellow text-xs font-bold lowercase text-black transition-colors"
+          >
+            editar lista
+          </button>
+          <button
+            id="closeViewModalFooterBtn"
+            type="button"
+            class="px-5 py-2 rounded-full bg-black hover:bg-neutral-800 text-tecnofil-yellow text-xs font-bold lowercase transition-colors"
+          >
+            cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- NOTIFICACIÓN TOAST (REEMPLAZA alert())                                -->
+  <!-- ===================================================================== -->
+  <div id="toastBox" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2.5 px-5 py-3 rounded-full bg-black text-tecnofil-yellow text-xs sm:text-sm font-bold lowercase shadow-xl border border-tecnofil-yellow/40">
+    <span class="w-2 h-2 rounded-full bg-tecnofil-yellow"></span>
+    <span id="toastText">guardado correctamente</span>
+  </div>
+
+  <!-- ===================================================================== -->
   <!-- FOOTER: BLANCO MINIMALISTA Y CENTRADO CON LOGO TECNOFIL               -->
   <!-- ===================================================================== -->
-  <footer class="bg-white border-t border-black/15 mt-auto">
-    <div class="max-w-[1120px] mx-auto px-4 sm:px-6 py-6 flex items-center justify-center">
-
-      <!-- Logotipo horizontal tecnofil centrado -->
+  <footer class="bg-white border-t border-black/10 mt-auto">
+    <div class="max-w-[1140px] mx-auto px-4 sm:px-6 py-6 flex items-center justify-center">
       <div class="inline-flex items-center gap-[7px]">
         <svg class="w-7 h-7 flex-shrink-0" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
@@ -254,463 +531,796 @@
           tecnofil
         </span>
       </div>
-
     </div>
   </footer>
 
   <!-- ===================================================================== -->
-  <!-- LÓGICA DE INTEGRACIÓN EN VIVO (GOOGLE SHEETS CSV)                     -->
+  <!-- LÓGICA DE LA APLICACIÓN (FOTOS .PNG + FORMULARIO + NUBE EN VIVO)      -->
   <!-- ===================================================================== -->
-  <script>
-    // Enlace CSV publicado en la web de Google Sheets
-    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAl0YbtOQdxmfxr8tDGBPt0Hn_Lk5GVN8_PP1SudyiazYrdcsRleaPCD2kg6QJAT06JzO5KR4lxe8U/pub?output=csv";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    // Máximo de participantes permitidos en la lista
+    // Máximo de participantes
     const MAX_PERSONAS = 13;
 
-    // Mapa de fotos dentro de la carpeta /fotos (coincide aunque en el Forms haya tildes o apellidos extra)
-    const FOTOS_POR_NOMBRE = {
-      "Alejandra Rojas": "fotos/Fotos_Alejandra Rojas.jpg",
-      "Diego Lazaro": "fotos/Fotos_Diego Lazaro.jpg",
-      "Emily Robles": "fotos/Fotos_Emily Robles.jpg",
-      "Fiorella Casanova": "fotos/Fotos_Fiorella Casanova.jpg",
-      "Francescoli Lucero": "fotos/Fotos_Francescoli Lucero.jpg",
-      "Mariel Cordero": "fotos/Fotos_Mariel Cordero.jpg",
-      "Meloddy Garcia": "fotos/Fotos_Meloddy Garcia.jpg"
-    };
+    // Clave de respaldo local cuando no existe configuración de Firebase
+    const LOCAL_STORAGE_KEY = "tecnofil_amigo_secreto_deseos_v1";
 
-    // Estado interno de la aplicación
+    // Respaldo de lectura del Google Sheet (opcional si existen datos previos)
+    const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQAl0YbtOQdxmfxr8tDGBPt0Hn_Lk5GVN8_PP1SudyiazYrdcsRleaPCD2kg6QJAT06JzO5KR4lxe8U/pub?output=csv";
+
+    // Respaldos públicos hacia tu repositorio de GitHub para que las fotos .png se vean en cualquier lugar
+    const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/diegolazarox/amigosecredtogdp/main/";
+    const GITHUB_PAGES_BASE = "https://diegolazarox.github.io/amigosecredtogdp/";
+
+    // Lista oficial de los 13 integrantes con sus fotos .png exactas del repositorio
+    const TEAM_DIRECTORY = [
+      { name: "Alejandra Rojas", file: "fotos/Fotos_Alejandra Rojas.png" },
+      { name: "Diego Lazaro", file: "fotos/Fotos_Diego Lazaro.png" },
+      { name: "Emily Robles", file: "fotos/Fotos_Emily Robles.png" },
+      { name: "Fiorella Casanova", file: "fotos/Fotos_Fiorella Casanova.png" },
+      { name: "Francescoli Lucero", file: "fotos/Fotos_Francescoli Lucero.png" },
+      { name: "Mariel Cordero", file: "fotos/Fotos_Mariel Cordero.png" },
+      { name: "Meloddy Garcia", file: "fotos/Fotos_Meloddy Garcia.png" },
+      { name: "Néstor Flores", file: "fotos/Fotos_Néstor Flores.png" },
+      { name: "Renato Galvez", file: "fotos/Fotos_Renato Galvez.png" },
+      { name: "Rodrigo Molero", file: "fotos/Fotos_Rodrigo Molero.png" },
+      { name: "Rosa Rosas", file: "fotos/Fotos_Rosa Rosas.png" },
+      { name: "Sofia Paredes", file: "fotos/Fotos_Sofia Paredes.png" },
+      { name: "Zaandra Silva", file: "fotos/Fotos_Zaandra Silva.png" }
+    ];
+
+    // Estado de la aplicación
     const state = {
       items: [],
-      isLoading: false,
-      hasError: false
+      useCloud: false,
+      db: null,
+      collectionPath: null,
+      toastTimer: null
     };
 
-    // Referencias a elementos del DOM
+    // Referencias al DOM
     const dom = {
       participantCount: document.getElementById("participantCount"),
-      refreshBtn: document.getElementById("refreshBtn"),
-      refreshIcon: document.getElementById("refreshIcon"),
       syncStatus: document.getElementById("syncStatus"),
+      progressBar: document.getElementById("progressBar"),
+      progressPercent: document.getElementById("progressPercent"),
+      teamAvatarStrip: document.getElementById("teamAvatarStrip"),
       loadingState: document.getElementById("loadingState"),
-      errorState: document.getElementById("errorState"),
-      errorMessage: document.getElementById("errorMessage"),
-      retryBtn: document.getElementById("retryBtn"),
       emptyNoDataState: document.getElementById("emptyNoDataState"),
-      cardsGrid: document.getElementById("cardsGrid")
+      cardsGrid: document.getElementById("cardsGrid"),
+      wishModal: document.getElementById("wishModal"),
+      modalTitle: document.getElementById("modalTitle"),
+      modalPreviewAvatar: document.getElementById("modalPreviewAvatar"),
+      wishForm: document.getElementById("wishForm"),
+      personSelect: document.getElementById("personSelect"),
+      gift1Text: document.getElementById("gift1Text"),
+      gift1Url: document.getElementById("gift1Url"),
+      gift2Text: document.getElementById("gift2Text"),
+      gift2Url: document.getElementById("gift2Url"),
+      gift3Text: document.getElementById("gift3Text"),
+      gift3Url: document.getElementById("gift3Url"),
+      formErrorMsg: document.getElementById("formErrorMsg"),
+      submitWishBtn: document.getElementById("submitWishBtn"),
+      viewGiftsModal: document.getElementById("viewGiftsModal"),
+      viewModalAvatar: document.getElementById("viewModalAvatar"),
+      viewModalName: document.getElementById("viewModalName"),
+      viewModalList: document.getElementById("viewModalList"),
+      viewModalEditBtn: document.getElementById("viewModalEditBtn"),
+      toastBox: document.getElementById("toastBox"),
+      toastText: document.getElementById("toastText")
     };
 
     // =========================================================================
-    // UTILIDADES DE SEGURIDAD Y TEXTO
+    // UTILIDADES GENERALES
     // =========================================================================
 
-    function escapeHtml(text) {
-      if (!text) return "";
-      return String(text).replace(/[&<>"']/g, (char) => {
-        const entities = {
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;"
-        };
-        return entities[char];
-      });
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
     function normalizeText(str) {
-      return String(str || "")
+      return String(str ?? "")
+        .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
+        .replace(/\s+/g, " ")
         .trim();
+    }
+
+    function getDocIdFromName(name) {
+      return normalizeText(name).replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "integrante";
     }
 
     function getInitials(name) {
-      const words = String(name || "")
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean);
-      if (words.length === 0) return "?";
-      if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
-      return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+      const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return "?";
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
 
-    /**
-     * Convierte un nombre en formato de archivo: minúsculas, sin tildes/ñ y con guiones.
-     * Ejemplo: "María Pérez" -> "maria-perez"
-     */
-    function slugifyName(name) {
-      return String(name || "")
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
+    function showToast(message) {
+      dom.toastText.textContent = message;
+      dom.toastBox.classList.remove("hidden");
+      dom.toastBox.classList.add("inline-flex");
+      clearTimeout(state.toastTimer);
+      state.toastTimer = setTimeout(() => {
+        dom.toastBox.classList.add("hidden");
+        dom.toastBox.classList.remove("inline-flex");
+      }, 3000);
     }
 
-    /**
-     * Resuelve la URL de la foto del participante:
-     * 1. Busca coincidencia exacta en FOTOS_POR_NOMBRE (ignorando tildes y mayúsculas).
-     * 2. Si el participante escribió apellidos adicionales o solo su nombre, busca coincidencia flexible.
-     * 3. Si aún no está en el mapa, busca automáticamente fotos/Fotos_{Nombre}.jpg.
-     */
-    function resolvePhotoUrl(name) {
-      const normalizedTarget = normalizeText(name);
-      if (!normalizedTarget) return "";
-
-      const entries = Object.entries(FOTOS_POR_NOMBRE);
-
-      // 1. Coincidencia exacta normalizada
-      for (const [key, url] of entries) {
-        if (normalizeText(key) === normalizedTarget && url) {
-          return encodeURI(url);
-        }
+    function launchConfetti() {
+      const colors = ["#FFDD00", "#000000", "#EFCD00", "#C87533", "#FFFFFF"];
+      for (let i = 0; i < 36; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti-piece";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.width = `${6 + Math.random() * 7}px`;
+        piece.style.height = `${8 + Math.random() * 8}px`;
+        piece.style.backgroundColor = colors[i % colors.length];
+        piece.style.borderRadius = Math.random() > 0.5 ? "9999px" : "2px";
+        piece.style.animationDelay = `${Math.random() * 0.45}s`;
+        piece.style.border = colors[i % colors.length] === "#FFFFFF" ? "1px solid #000" : "none";
+        document.body.appendChild(piece);
+        setTimeout(() => piece.remove(), 2700);
       }
-
-      // 2. Coincidencia flexible (ej. "Diego Lázaro Pérez" o solo "Alejandra")
-      const targetWords = normalizedTarget.split(/\s+/).filter(Boolean);
-      for (const [key, url] of entries) {
-        if (!url) continue;
-        const keyWords = normalizeText(key).split(/\s+/).filter(Boolean);
-        const allKeyWordsPresent = keyWords.every((w) => targetWords.includes(w));
-        const allTargetWordsPresent = targetWords.length > 0 && targetWords.every((w) => keyWords.includes(w));
-        if (allKeyWordsPresent || allTargetWordsPresent) {
-          return encodeURI(url);
-        }
-      }
-
-      // 3. Respaldo automático para futuras fotos con el mismo formato Fotos_Nombre Apellido.jpg
-      const cleanName = String(name || "").trim().replace(/\s+/g, " ");
-      return cleanName ? encodeURI(`fotos/Fotos_${cleanName}.jpg`) : "";
     }
 
-    /**
-     * Detecta enlaces http://, https:// y www. dentro de un regalo
-     * y separa el texto limpio de las URLs encontradas.
-     */
-    function extractLinksFromOption(rawText) {
-      const text = String(rawText || "");
-      const urlRegex = /(?:https?:\/\/|www\.)[^\s<>()]+/gi;
-      const urls = [];
+    // =========================================================================
+    // RESOLUCIÓN DE FOTOS .PNG CON RESPALDOS AUTOMÁTICOS
+    // =========================================================================
 
-      const cleanText = text
-        .replace(urlRegex, (match) => {
-          const cleanedMatch = match.replace(/[.,;:!?)\]]+$/, "");
-          const trailingPunctuation = match.slice(cleanedMatch.length);
-          const normalizedUrl = /^https?:\/\//i.test(cleanedMatch)
-            ? cleanedMatch
-            : `https://${cleanedMatch}`;
-          urls.push(normalizedUrl);
-          return trailingPunctuation;
-        })
-        .replace(/\s{2,}/g, " ")
-        .replace(/^[\s\-–—:|,]+|[\s\-–—:|,]+$/g, "")
-        .trim();
-
-      return { cleanText, urls };
-    }
-
-    /**
-     * Parsea texto CSV respetando comillas dobles, comas internas y saltos de línea.
-     */
-    function parseCSV(csvText) {
-      const rows = [];
-      let currentRow = [];
-      let currentField = "";
-      let inQuotes = false;
-
-      // Elimina BOM UTF-8 si Google Sheets lo incluye
-      const input = String(csvText || "").replace(/^\uFEFF/, "");
-
-      for (let i = 0; i < input.length; i++) {
-        const char = input[i];
-        const nextChar = input[i + 1];
-
-        if (inQuotes) {
-          if (char === '"' && nextChar === '"') {
-            currentField += '"';
-            i++; // Salta la comilla escapada
-          } else if (char === '"') {
-            inQuotes = false;
-          } else {
-            currentField += char;
-          }
-        } else {
-          if (char === '"') {
-            inQuotes = true;
-          } else if (char === ",") {
-            currentRow.push(currentField);
-            currentField = "";
-          } else if (char === "\r" && nextChar === "\n") {
-            currentRow.push(currentField);
-            rows.push(currentRow);
-            currentRow = [];
-            currentField = "";
-            i++; // Salta el \n de \r\n
-          } else if (char === "\n" || char === "\r") {
-            currentRow.push(currentField);
-            rows.push(currentRow);
-            currentRow = [];
-            currentField = "";
-          } else {
-            currentField += char;
-          }
-        }
-      }
-
-      // Agrega el último campo/fila si existe contenido
-      if (currentField.length > 0 || currentRow.length > 0) {
-        currentRow.push(currentField);
-        rows.push(currentRow);
-      }
-
-      return rows;
-    }
-
-    /**
-     * Encuentra el índice de columna en los encabezados buscando patrones flexibles.
-     */
-    function findColumnIndex(normalizedHeaders, patterns) {
-      for (const pattern of patterns) {
-        const idx = normalizedHeaders.findIndex((h) => h.includes(pattern));
-        if (idx !== -1) return idx;
-      }
-      return -1;
-    }
-
-    /**
-     * Transforma las filas del CSV en una lista deduplicada, ordenada A-Z y limitada a MAX_PERSONAS.
-     */
-    function processCSVData(csvText) {
-      const rows = parseCSV(csvText).filter((row) =>
-        row.some((cell) => String(cell || "").trim() !== "")
-      );
-
-      if (rows.length <= 1) return [];
-
-      const headers = rows[0].map((h) => normalizeText(h));
-
-      let nameIdx = findColumnIndex(headers, ["quien eres", "nombre", "participante"]);
-      let gift1Idx = findColumnIndex(headers, ["regalo 1", "opcion 1", "deseo 1"]);
-      let gift2Idx = findColumnIndex(headers, ["regalo 2", "opcion 2", "deseo 2"]);
-      let gift3Idx = findColumnIndex(headers, ["regalo 3", "opcion 3", "deseo 3"]);
-
-      // Respaldo posicional si los encabezados difieren
-      if (nameIdx === -1) nameIdx = headers.length >= 5 ? 1 : 0;
-      if (gift1Idx === -1) gift1Idx = nameIdx + 1;
-      if (gift2Idx === -1) gift2Idx = nameIdx + 2;
-      if (gift3Idx === -1) gift3Idx = nameIdx + 3;
-
-      // Deduplicación por nombre normalizado (conserva la respuesta más reciente)
-      const uniqueMap = new Map();
-
-      for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        const rawName = String(row[nameIdx] || "").trim();
-        if (!rawName) continue;
-
-        const key = normalizeText(rawName);
-        const gifts = [
-          String(row[gift1Idx] || "").trim(),
-          String(row[gift2Idx] || "").trim(),
-          String(row[gift3Idx] || "").trim()
-        ];
-
-        uniqueMap.set(key, {
-          name: rawName,
-          gifts
+    function getPhotoCandidates(name) {
+      const norm = normalizeText(name);
+      const match = TEAM_DIRECTORY.find((m) => normalizeText(m.name) === norm)
+        || TEAM_DIRECTORY.find((m) => {
+          const mNorm = normalizeText(m.name);
+          return norm && (mNorm.includes(norm) || norm.includes(mNorm));
         });
-      }
 
-      // Limita al máximo configurado y ordena automáticamente de la A a la Z
-      return Array.from(uniqueMap.values())
-        .slice(0, MAX_PERSONAS)
-        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }));
+      const relPath = match ? match.file : `fotos/Fotos_${String(name || "").trim()}.png`;
+      const encodedRel = encodeURI(relPath);
+
+      return [
+        encodedRel,
+        `${GITHUB_PAGES_BASE}${encodedRel}`,
+        `${GITHUB_RAW_BASE}${encodedRel}`
+      ];
+    }
+
+    // Manejador global de fallback para imágenes de avatares
+    window.handleAvatarError = function (imgEl) {
+      const fallbacks = (imgEl.dataset.fallbacks || "").split("|").filter(Boolean);
+      const nextIndex = Number(imgEl.dataset.fallbackIdx || 0);
+      if (nextIndex < fallbacks.length) {
+        imgEl.dataset.fallbackIdx = String(nextIndex + 1);
+        imgEl.src = fallbacks[nextIndex];
+      } else {
+        imgEl.style.display = "none";
+      }
+    };
+
+    function buildAvatarImgTag(name, extraClasses = "") {
+      const candidates = getPhotoCandidates(name);
+      const [first, ...rest] = candidates;
+      return `
+        <img
+          src="${escapeHtml(first)}"
+          data-fallbacks="${escapeHtml(rest.join("|"))}"
+          data-fallback-idx="0"
+          alt="${escapeHtml(name)}"
+          loading="lazy"
+          onerror="window.handleAvatarError(this)"
+          class="absolute inset-0 w-full h-full object-cover object-top ${extraClasses}"
+        />
+      `;
     }
 
     // =========================================================================
-    // RENDERIZADO DE LA INTERFAZ
+    // NORMALIZACIÓN DE REGALOS Y ENLACES
     // =========================================================================
 
-    /**
-     * Genera el HTML del avatar circular con foto y respaldo automático de iniciales.
-     */
-    function buildAvatarHtml(name) {
-      const photoUrl = resolvePhotoUrl(name);
-      const initials = escapeHtml(getInitials(name));
-      const safeAlt = escapeHtml(name);
+    function normalizeGiftEntry(gift) {
+      if (!gift) return { text: "", rawUrl: "", href: "" };
 
-      if (!photoUrl) {
+      let text = "";
+      let rawUrl = "";
+
+      if (typeof gift === "string") {
+        text = gift.trim();
+      } else {
+        text = String(gift.text || "").trim();
+        rawUrl = String(gift.url || "").trim();
+      }
+
+      // Si no hay URL separada, intenta detectar una dentro del texto
+      if (!rawUrl && text) {
+        const urlMatch = text.match(/(https?:\/\/[^\s]+|www\.[^\s]+)/i);
+        if (urlMatch) {
+          rawUrl = urlMatch[0].replace(/[),.;]+$/, "");
+          text = text.replace(urlMatch[0], "").trim();
+        }
+      }
+
+      let href = "";
+      if (rawUrl) {
+        href = /^https?:\/\//i.test(rawUrl) ? rawUrl : `https://${rawUrl}`;
+      }
+
+      return { text, rawUrl, href };
+    }
+
+    function buildGiftRowHtml(gift, indexNumber) {
+      const { text, href } = normalizeGiftEntry(gift);
+      const isEmpty = !text && !href;
+
+      if (isEmpty) {
         return `
-          <div class="w-14 h-14 rounded-full bg-tecnofil-yellow border-2 border-tecnofil-yellowBorder flex items-center justify-center flex-shrink-0">
-            <span class="text-sm font-bold text-black tracking-tight">${initials}</span>
-          </div>
+          <li class="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-dashed border-black/15">
+            <span class="w-6 h-6 rounded-full bg-neutral-200 text-black/45 text-xs font-bold flex items-center justify-center flex-shrink-0">
+              ${indexNumber}
+            </span>
+            <span class="text-xs font-light lowercase text-black/40">sin especificar</span>
+          </li>
         `;
       }
 
       return `
-        <div class="relative w-14 h-14 rounded-full bg-tecnofil-yellow border-2 border-tecnofil-yellowBorder overflow-hidden flex items-center justify-center flex-shrink-0">
-          <span class="text-sm font-bold text-black tracking-tight select-none">${initials}</span>
-          <img
-            src="${photoUrl}"
-            alt="${safeAlt}"
-            loading="lazy"
-            class="absolute inset-0 w-full h-full object-cover object-top"
-            onerror="this.style.display='none';"
-          />
-        </div>
-      `;
-    }
-
-    /**
-     * Genera el HTML de cada fila de regalo con detección automática de enlaces.
-     */
-    function buildGiftRowHtml(rawGift, number) {
-      const { cleanText, urls } = extractLinksFromOption(rawGift);
-      const hasContent = cleanText.length > 0 || urls.length > 0;
-
-      const textHtml = hasContent
-        ? (cleanText
-            ? `<p class="text-sm font-light text-black leading-snug break-words">${escapeHtml(cleanText)}</p>`
-            : "")
-        : `<p class="text-sm font-light text-black/40 italic lowercase">sin especificar</p>`;
-
-      const linksHtml = urls.length > 0
-        ? `<div class="mt-1.5 flex flex-wrap gap-1.5">
-            ${urls.map((url, idx) => `
-              <a
-                href="${escapeHtml(url)}"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-tecnofil-yellow hover:bg-tecnofil-yellowHover border border-tecnofil-yellowBorder text-[11px] font-bold lowercase text-black transition-colors"
-              >
-                <span>${urls.length > 1 ? `ver enlace ${idx + 1} ↗` : "ver enlace ↗"}</span>
-              </a>
-            `).join("")}
-          </div>`
-        : "";
-
-      return `
-        <li class="flex items-start gap-3 py-2.5 border-t border-black/10 first:border-t-0 first:pt-0">
-          <span class="w-6 h-6 rounded-full bg-tecnofil-yellow border border-tecnofil-yellowBorder text-black text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-            ${number}
+        <li class="flex items-start gap-3 p-3 rounded-xl bg-[#FAFAFA] border border-black/10 hover:border-black/30 transition-colors">
+          <span class="mt-0.5 w-6 h-6 rounded-full bg-tecnofil-yellow border border-black text-black text-xs font-bold flex items-center justify-center flex-shrink-0">
+            ${indexNumber}
           </span>
           <div class="min-w-0 flex-1">
-            ${textHtml}
-            ${linksHtml}
+            <p class="text-sm font-medium text-black leading-snug break-words">
+              ${escapeHtml(text || "ver enlace de referencia")}
+            </p>
+            ${href ? `
+              <a
+                href="${escapeHtml(href)}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="mt-1.5 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-tecnofil-yellow/60 hover:bg-tecnofil-yellow border border-black/20 text-[11px] font-bold lowercase text-black transition-colors"
+              >
+                <span>ver enlace</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            ` : ""}
           </div>
         </li>
       `;
     }
 
-    /**
-     * Actualiza la visibilidad de los estados y dibuja las tarjetas.
-     */
-    function render() {
-      const count = state.items.length;
+    // =========================================================================
+    // RENDERIZADO DE PROGRESO, BARRA DE CARAS Y TARJETAS
+    // =========================================================================
+
+    function renderTeamAvatarStrip() {
+      const registeredSet = new Set(state.items.map((item) => normalizeText(item.name)));
+
+      dom.teamAvatarStrip.innerHTML = TEAM_DIRECTORY
+        .map((member) => {
+          const isRegistered = registeredSet.has(normalizeText(member.name));
+          const firstName = member.name.split(" ")[0];
+          const ringClasses = isRegistered
+            ? "border-black ring-2 ring-tecnofil-yellow"
+            : "border-black/20 opacity-65 hover:opacity-100";
+
+          return `
+            <button
+              type="button"
+              data-member-name="${escapeHtml(member.name)}"
+              title="${escapeHtml(member.name)} · ${isRegistered ? "clic para ver sus regalos" : "aún no registra (clic para agregar)"}"
+              class="team-avatar-btn group flex flex-col items-center gap-1 flex-shrink-0 focus:outline-none"
+            >
+              <div class="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full border-2 ${ringClasses} bg-tecnofil-yellow/30 overflow-hidden flex items-center justify-center transition-all group-hover:-translate-y-0.5">
+                <span class="text-[11px] font-bold text-black select-none">${escapeHtml(getInitials(member.name))}</span>
+                ${buildAvatarImgTag(member.name, isRegistered ? "" : "grayscale group-hover:grayscale-0 transition-all")}
+                ${isRegistered ? `
+                  <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-black text-tecnofil-yellow flex items-center justify-center border border-white">
+                    <svg class="w-2.5 h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </span>
+                ` : ""}
+              </div>
+              <span class="text-[10px] font-semibold text-black/80 max-w-[54px] truncate">
+                ${escapeHtml(firstName)}
+              </span>
+            </button>
+          `;
+        })
+        .join("");
+
+      // Clic en una cara: si ya registró muestra sus regalos; si no, abre el formulario
+      dom.teamAvatarStrip.querySelectorAll(".team-avatar-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const memberName = btn.dataset.memberName;
+          const existing = state.items.find(
+            (item) => normalizeText(item.name) === normalizeText(memberName)
+          );
+          if (existing) {
+            openViewModal(existing);
+          } else {
+            openModal(memberName);
+          }
+        });
+      });
+    }
+
+    function renderAll() {
+      // Ordenar alfabéticamente A-Z y limitar a MAX_PERSONAS
+      const sorted = [...state.items]
+        .sort((a, b) => a.name.localeCompare(b.name, "es", { sensitivity: "base" }))
+        .slice(0, MAX_PERSONAS);
+
+      const count = sorted.length;
+      const pct = Math.min(100, Math.round((count / MAX_PERSONAS) * 100));
+
       dom.participantCount.textContent = `${count} de ${MAX_PERSONAS} personas`;
+      dom.progressBar.style.width = `${pct}%`;
+      dom.progressPercent.textContent = `${pct}%`;
 
-      // Oculta todos los contenedores antes de mostrar el estado correspondiente
+      renderTeamAvatarStrip();
       dom.loadingState.classList.add("hidden");
-      dom.errorState.classList.add("hidden");
-      dom.emptyNoDataState.classList.add("hidden");
-      dom.cardsGrid.classList.add("hidden");
-
-      if (state.isLoading && count === 0) {
-        dom.loadingState.classList.remove("hidden");
-        return;
-      }
-
-      if (state.hasError && count === 0) {
-        dom.errorState.classList.remove("hidden");
-        return;
-      }
 
       if (count === 0) {
+        dom.cardsGrid.classList.add("hidden");
         dom.emptyNoDataState.classList.remove("hidden");
         return;
       }
 
-      dom.cardsGrid.innerHTML = state.items
-        .map((person, index) => `
-          <article
-            class="card-animate w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white rounded border border-black/15 hover:border-black transition-colors p-5 flex flex-col shadow-sm"
-            style="animation-delay: ${Math.min(index * 40, 400)}ms;"
-          >
-            <div class="flex items-center gap-3.5 pb-4 border-b border-black/10">
-              ${buildAvatarHtml(person.name)}
-              <div class="min-w-0">
-                <h2 class="text-base font-bold text-black leading-tight break-words">
-                  ${escapeHtml(person.name)}
-                </h2>
-              </div>
-            </div>
+      dom.emptyNoDataState.classList.add("hidden");
+      dom.cardsGrid.classList.remove("hidden");
 
-            <ul class="mt-4 flex-1 flex flex-col">
-              ${buildGiftRowHtml(person.gifts[0], 1)}
-              ${buildGiftRowHtml(person.gifts[1], 2)}
-              ${buildGiftRowHtml(person.gifts[2], 3)}
-            </ul>
+      dom.cardsGrid.innerHTML = sorted
+        .map((person, idx) => `
+          <article
+            class="gift-card card-animate w-full sm:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)] max-w-[360px] bg-white rounded-2xl border-2 border-black/15 overflow-hidden flex flex-col shadow-sm"
+            style="animation-delay: ${Math.min(idx * 45, 360)}ms"
+          >
+            <!-- Franja superior amarilla tecnofil -->
+            <div class="h-2 w-full bg-tecnofil-yellow border-b border-black/10"></div>
+
+            <div class="p-5 flex-1 flex flex-col">
+              <!-- Cabecera de tarjeta: foto + nombre + editar -->
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="relative w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-tecnofil-yellow border-2 border-black overflow-hidden flex items-center justify-center flex-shrink-0 shadow-xs">
+                    <span class="text-sm font-bold text-black select-none">${escapeHtml(getInitials(person.name))}</span>
+                    ${buildAvatarImgTag(person.name)}
+                  </div>
+                  <div class="min-w-0">
+                    <h3 class="text-base font-bold text-black leading-tight break-words">
+                      ${escapeHtml(person.name)}
+                    </h3>
+                    <span class="inline-block mt-1 text-[11px] font-light lowercase text-black/55">
+                      regalos registrados
+                    </span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  data-edit-name="${escapeHtml(person.name)}"
+                  class="card-edit-btn px-3 py-1.5 rounded-full bg-neutral-100 hover:bg-black hover:text-tecnofil-yellow text-[11px] font-bold lowercase text-black transition-colors flex-shrink-0"
+                >
+                  editar
+                </button>
+              </div>
+
+              <!-- Lista numerada de los 3 regalos -->
+              <ul class="flex flex-col gap-2.5 flex-1">
+                ${buildGiftRowHtml(person.gifts?.[0], 1)}
+                ${buildGiftRowHtml(person.gifts?.[1], 2)}
+                ${buildGiftRowHtml(person.gifts?.[2], 3)}
+              </ul>
+            </div>
           </article>
         `)
         .join("");
 
-      dom.cardsGrid.classList.remove("hidden");
-    }
-
-    // =========================================================================
-    // SINCRONIZACIÓN CON GOOGLE SHEETS
-    // =========================================================================
-
-    function formatTimeNow() {
-      const now = new Date();
-      return now.toLocaleTimeString("es-PE", {
-        hour: "2-digit",
-        minute: "2-digit"
+      dom.cardsGrid.querySelectorAll(".card-edit-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          openModal(btn.dataset.editName);
+        });
       });
     }
 
-    async function loadWishlist() {
-      state.isLoading = true;
-      state.hasError = false;
-      dom.refreshBtn.disabled = true;
-      dom.refreshIcon.classList.add("spin-active");
-      dom.syncStatus.textContent = "sincronizando...";
-      render();
+    // =========================================================================
+    // MODAL DE VISUALIZACIÓN DE REGALOS (SOLO LECTURA)
+    // =========================================================================
 
-      try {
-        const cacheBusterUrl = `${GOOGLE_SHEET_CSV_URL}&t=${Date.now()}`;
-        const response = await fetch(cacheBusterUrl, { cache: "no-store" });
+    let currentViewingName = "";
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+    function openViewModal(person) {
+      currentViewingName = person.name;
+      dom.viewModalName.textContent = person.name;
+      dom.viewModalAvatar.innerHTML = `
+        <span class="text-xs font-bold text-black select-none">${escapeHtml(getInitials(person.name))}</span>
+        ${buildAvatarImgTag(person.name)}
+      `;
+      dom.viewModalList.innerHTML = `
+        ${buildGiftRowHtml(person.gifts?.[0], 1)}
+        ${buildGiftRowHtml(person.gifts?.[1], 2)}
+        ${buildGiftRowHtml(person.gifts?.[2], 3)}
+      `;
+      dom.viewGiftsModal.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeViewModal() {
+      dom.viewGiftsModal.classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    document.getElementById("closeViewModalBtn").addEventListener("click", closeViewModal);
+    document.getElementById("closeViewModalFooterBtn").addEventListener("click", closeViewModal);
+    dom.viewGiftsModal.addEventListener("click", (e) => {
+      if (e.target === dom.viewGiftsModal) closeViewModal();
+    });
+    dom.viewModalEditBtn.addEventListener("click", () => {
+      const nameToEdit = currentViewingName;
+      closeViewModal();
+      openModal(nameToEdit);
+    });
+
+    // =========================================================================
+    // MODAL DE REGISTRO Y EDICIÓN
+    // =========================================================================
+
+    function populatePersonSelect(preselectedName = "") {
+      const options = [
+        `<option value="">selecciona tu nombre...</option>`,
+        ...TEAM_DIRECTORY.map(
+          (m) => `<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)}</option>`
+        )
+      ];
+
+      // Agrega cualquier integrante extra ya guardado en base de datos si aún no está en TEAM_DIRECTORY
+      state.items.forEach((item) => {
+        if (!TEAM_DIRECTORY.some((m) => normalizeText(m.name) === normalizeText(item.name))) {
+          options.push(`<option value="${escapeHtml(item.name)}">${escapeHtml(item.name)}</option>`);
         }
+      });
 
-        const csvText = await response.text();
-        state.items = processCSVData(csvText);
-        dom.syncStatus.textContent = `actualizado ${formatTimeNow()}`;
-      } catch (error) {
-        console.error("Error al cargar el CSV:", error);
-        state.hasError = true;
-        dom.errorMessage.textContent =
-          "No se pudieron obtener las respuestas del documento. Verifica tu conexión e intenta nuevamente.";
-        dom.syncStatus.textContent = "error de conexión";
-      } finally {
-        state.isLoading = false;
-        dom.refreshBtn.disabled = false;
-        dom.refreshIcon.classList.remove("spin-active");
-        render();
+      dom.personSelect.innerHTML = options.join("");
+
+      if (preselectedName) {
+        const matchOption = Array.from(dom.personSelect.options).find(
+          (opt) => normalizeText(opt.value) === normalizeText(preselectedName)
+        );
+        dom.personSelect.value = matchOption ? matchOption.value : "";
+      } else {
+        dom.personSelect.value = "";
+      }
+
+      syncModalFieldsForSelection();
+    }
+
+    function updateModalPreviewAvatar(name) {
+      if (!name) {
+        dom.modalPreviewAvatar.innerHTML = `<span class="text-xs font-bold text-black">?</span>`;
+        return;
+      }
+      dom.modalPreviewAvatar.innerHTML = `
+        <span class="text-xs font-bold text-black select-none">${escapeHtml(getInitials(name))}</span>
+        ${buildAvatarImgTag(name)}
+      `;
+    }
+
+    function syncModalFieldsForSelection() {
+      const currentName = dom.personSelect.value;
+      updateModalPreviewAvatar(currentName);
+
+      // Si esa persona ya tiene deseos registrados, precarga sus datos para editar
+      const existing = state.items.find(
+        (item) => normalizeText(item.name) === normalizeText(currentName)
+      );
+
+      if (existing) {
+        dom.modalTitle.textContent = "editar mis regalos";
+        const g1 = normalizeGiftEntry(existing.gifts?.[0]);
+        const g2 = normalizeGiftEntry(existing.gifts?.[1]);
+        const g3 = normalizeGiftEntry(existing.gifts?.[2]);
+        dom.gift1Text.value = g1.text;
+        dom.gift1Url.value = g1.rawUrl;
+        dom.gift2Text.value = g2.text;
+        dom.gift2Url.value = g2.rawUrl;
+        dom.gift3Text.value = g3.text;
+        dom.gift3Url.value = g3.rawUrl;
+      } else {
+        dom.modalTitle.textContent = "registrar mis regalos";
+        dom.gift1Text.value = "";
+        dom.gift1Url.value = "";
+        dom.gift2Text.value = "";
+        dom.gift2Url.value = "";
+        dom.gift3Text.value = "";
+        dom.gift3Url.value = "";
       }
     }
 
-    // Eventos de usuario
-    dom.refreshBtn.addEventListener("click", loadWishlist);
-    dom.retryBtn.addEventListener("click", loadWishlist);
+    function openModal(preselectedName = "") {
+      dom.formErrorMsg.classList.add("hidden");
+      populatePersonSelect(preselectedName);
+      dom.wishModal.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
 
-    // Carga inicial al abrir la página
-    loadWishlist();
+    function closeModal() {
+      dom.wishModal.classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    // Eventos del modal
+    document.getElementById("openModalHeaderBtn").addEventListener("click", () => openModal());
+    document.getElementById("openModalHeroBtn").addEventListener("click", () => openModal());
+    document.getElementById("openModalEmptyBtn").addEventListener("click", () => openModal());
+    document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+    document.getElementById("cancelModalBtn").addEventListener("click", closeModal);
+    dom.wishModal.addEventListener("click", (e) => {
+      if (e.target === dom.wishModal) closeModal();
+    });
+    dom.personSelect.addEventListener("change", syncModalFieldsForSelection);
+
+    // Cerrar modales con tecla Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        if (!dom.wishModal.classList.contains("hidden")) closeModal();
+        if (!dom.viewGiftsModal.classList.contains("hidden")) closeViewModal();
+      }
+    });
+
+    // Guardado del formulario
+    dom.wishForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      dom.formErrorMsg.classList.add("hidden");
+
+      const finalName = dom.personSelect.value.trim();
+
+      if (!finalName) {
+        dom.formErrorMsg.textContent = "Por favor selecciona tu nombre de la lista.";
+        dom.formErrorMsg.classList.remove("hidden");
+        return;
+      }
+
+      const gifts = [
+        { text: dom.gift1Text.value.trim(), url: dom.gift1Url.value.trim() },
+        { text: dom.gift2Text.value.trim(), url: dom.gift2Url.value.trim() },
+        { text: dom.gift3Text.value.trim(), url: dom.gift3Url.value.trim() }
+      ];
+
+      if (!gifts[0].text && !gifts[0].url) {
+        dom.formErrorMsg.textContent = "Por favor escribe al menos tu primer regalo deseado.";
+        dom.formErrorMsg.classList.remove("hidden");
+        return;
+      }
+
+      const payload = {
+        name: finalName,
+        gifts,
+        updatedAt: new Date().toISOString()
+      };
+
+      dom.submitWishBtn.disabled = true;
+      dom.submitWishBtn.textContent = "guardando...";
+
+      try {
+        await saveWish(payload);
+        closeModal();
+        launchConfetti();
+        showToast("¡regalos guardados correctamente!");
+      } catch (err) {
+        console.error("Error al guardar regalos:", err);
+        dom.formErrorMsg.textContent = "No se pudo guardar en este momento. Intenta nuevamente.";
+        dom.formErrorMsg.classList.remove("hidden");
+      } finally {
+        dom.submitWishBtn.disabled = false;
+        dom.submitWishBtn.textContent = "guardar mis regalos";
+      }
+    });
+
+    // =========================================================================
+    // PERSISTENCIA: FIREBASE EN VIVO O RESPALDO LOCAL + CSV
+    // =========================================================================
+
+    async function saveWish(payload) {
+      const docId = getDocIdFromName(payload.name);
+
+      if (state.useCloud && state.db && state.collectionPath) {
+        const docRef = doc(state.db, ...state.collectionPath, docId);
+        await setDoc(docRef, payload, { merge: true });
+      } else {
+        // Actualización en memoria y localStorage
+        const idx = state.items.findIndex(
+          (item) => normalizeText(item.name) === normalizeText(payload.name)
+        );
+        if (idx >= 0) {
+          state.items[idx] = payload;
+        } else {
+          state.items.push(payload);
+        }
+        try {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(state.items));
+        } catch (storageErr) {
+          console.warn("No se pudo guardar en localStorage:", storageErr);
+        }
+        renderAll();
+      }
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let currentRow = [];
+      let currentVal = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        const next = text[i + 1];
+
+        if (inQuotes) {
+          if (ch === '"' && next === '"') {
+            currentVal += '"';
+            i++;
+          } else if (ch === '"') {
+            inQuotes = false;
+          } else {
+            currentVal += ch;
+          }
+        } else {
+          if (ch === '"') {
+            inQuotes = true;
+          } else if (ch === ",") {
+            currentRow.push(currentVal.trim());
+            currentVal = "";
+          } else if (ch === "\n" || ch === "\r") {
+            if (ch === "\r" && next === "\n") i++;
+            currentRow.push(currentVal.trim());
+            if (currentRow.some((cell) => cell !== "")) {
+              rows.push(currentRow);
+            }
+            currentRow = [];
+            currentVal = "";
+          } else {
+            currentVal += ch;
+          }
+        }
+      }
+
+      if (currentVal !== "" || currentRow.length > 0) {
+        currentRow.push(currentVal.trim());
+        if (currentRow.some((cell) => cell !== "")) {
+          rows.push(currentRow);
+        }
+      }
+      return rows;
+    }
+
+    async function loadLocalAndSheetFallback() {
+      const mergedMap = new Map();
+
+      // 1. Intenta cargar respuestas previas del Google Sheet (si responde)
+      try {
+        const res = await fetch(`${GOOGLE_SHEET_CSV_URL}&t=${Date.now()}`);
+        if (res.ok) {
+          const csvText = await res.text();
+          const rows = parseCSV(csvText);
+          if (rows.length > 1) {
+            const headers = rows[0].map((h) => normalizeText(h));
+            const nameIdx = headers.findIndex((h) => h.includes("quien") || h.includes("nombre"));
+            const g1Idx = headers.findIndex((h) => h.includes("1"));
+            const g2Idx = headers.findIndex((h) => h.includes("2"));
+            const g3Idx = headers.findIndex((h) => h.includes("3"));
+
+            const nCol = nameIdx >= 0 ? nameIdx : 0;
+            const c1 = g1Idx >= 0 ? g1Idx : 1;
+            const c2 = g2Idx >= 0 ? g2Idx : 2;
+            const c3 = g3Idx >= 0 ? g3Idx : 3;
+
+            for (let i = 1; i < rows.length; i++) {
+              const r = rows[i];
+              const name = (r[nCol] || "").trim();
+              if (!name) continue;
+              mergedMap.set(normalizeText(name), {
+                name,
+                gifts: [
+                  { text: (r[c1] || "").trim(), url: "" },
+                  { text: (r[c2] || "").trim(), url: "" },
+                  { text: (r[c3] || "").trim(), url: "" }
+                ]
+              });
+            }
+          }
+        }
+      } catch (sheetErr) {
+        console.warn("Google Sheet no disponible, usando almacenamiento local:", sheetErr);
+      }
+
+      // 2. Superpone los cambios guardados localmente
+      try {
+        const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            parsed.forEach((item) => {
+              if (item && item.name) {
+                mergedMap.set(normalizeText(item.name), item);
+              }
+            });
+          }
+        }
+      } catch (localErr) {
+        console.warn("Error leyendo localStorage:", localErr);
+      }
+
+      state.items = Array.from(mergedMap.values());
+      dom.syncStatus.textContent = "modo local activo";
+      renderAll();
+    }
+
+    async function initApp() {
+      dom.loadingState.classList.remove("hidden");
+      renderTeamAvatarStrip();
+
+      try {
+        const rawConfig = typeof window.__firebase_config !== "undefined" ? window.__firebase_config : null;
+        if (rawConfig) {
+          const firebaseConfig = typeof rawConfig === "string" ? JSON.parse(rawConfig) : rawConfig;
+          const appId = typeof window.__app_id !== "undefined" ? String(window.__app_id) : "tecnofil-amigo-secreto";
+
+          const app = initializeApp(firebaseConfig);
+          const auth = getAuth(app);
+
+          if (typeof window.__initial_auth_token !== "undefined" && window.__initial_auth_token) {
+            await signInWithCustomToken(auth, window.__initial_auth_token);
+          } else {
+            await signInAnonymously(auth);
+          }
+
+          state.db = getFirestore(app);
+          state.collectionPath = ["artifacts", appId, "public", "data", "amigo_secreto_deseos"];
+          state.useCloud = true;
+
+          const colRef = collection(state.db, ...state.collectionPath);
+          onSnapshot(
+            colRef,
+            (snapshot) => {
+              const list = [];
+              snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                if (data && data.name) {
+                  list.push(data);
+                }
+              });
+              state.items = list;
+              dom.syncStatus.textContent = "sincronizado en vivo";
+              renderAll();
+            },
+            (err) => {
+              console.error("Error de escucha en Firestore:", err);
+              state.useCloud = false;
+              loadLocalAndSheetFallback();
+            }
+          );
+          return;
+        }
+      } catch (cloudErr) {
+        console.warn("No se pudo iniciar Firebase, cambiando a modo local:", cloudErr);
+      }
+
+      await loadLocalAndSheetFallback();
+    }
+
+    // Iniciar aplicación
+    initApp();
   </script>
 </body>
 </html>
